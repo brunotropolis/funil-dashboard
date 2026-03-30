@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Funil Meteorico</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --border: #2a2d3a;
+  --text: #e4e4e7;
+  --muted: #71717a;
+  --accent: #8b5cf6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --blue: #3b82f6;
+  --pink: #ec4899;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-size: 1.5rem; font-weight: 700; }
+.header h1 span { color: var(--accent); }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
+.btn:hover { border-color: var(--accent); }
+.btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-accent:hover { opacity: 0.9; }
+.btn-danger { border-color: var(--red); color: var(--red); }
+.btn-danger:hover { background: var(--red); color: #fff; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.off { background: var(--red); }
+
+/* Cards grid */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.card-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.card-value { font-size: 1.8rem; font-weight: 700; }
+.card-sub { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+.card-value.green { color: var(--green); }
+.card-value.red { color: var(--red); }
+.card-value.blue { color: var(--blue); }
+.card-value.accent { color: var(--accent); }
+
+/* Sections */
+.section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+/* Grupo info bar */
+.grupo-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.grupo-bar .grupo-name { font-size: 1.1rem; font-weight: 600; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+.badge-ativo { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-captando { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-encerrado { background: rgba(113,113,122,0.15); color: var(--muted); }
+.badge-futuro { background: rgba(139,92,246,0.15); color: var(--accent); }
+.badge-pendente { background: rgba(234,179,8,0.15); color: var(--yellow); }
+.badge-enviado { background: rgba(34,197,94,0.15); color: var(--green); }
+.badge-erro { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-processando { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-ignorar { background: rgba(113,113,122,0.15); color: var(--muted); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(139,92,246,0.05); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: transparent; border: 1px solid var(--border); color: var(--muted); transition: all 0.15s; }
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tab:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+.tab-count { font-size: 0.7rem; opacity: 0.7; margin-left: 4px; }
+
+/* Loading */
+.loading { text-align: center; padding: 40px; color: var(--muted); }
+.loading-spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Grid 2 cols */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Scroll */
+.table-scroll { overflow-x: auto; }
+
+.updated-at { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1><span>Funil Meteorico</span> Dashboard</h1>
+    <div class="header-actions">
+      <span class="updated-at" id="updatedAt"></span>
+      <button class="btn" onclick="loadData()">Atualizar</button>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="statusBar" class="section" style="padding: 14px 20px;">
+    <div class="grupo-bar">
+      <span class="status-dot off" id="statusDot"></span>
+      <span id="statusText">Carregando...</span>
+    </div>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="cards" id="cards">
+    <div class="card"><div class="card-label">Participantes (grupo ativo)</div><div class="card-value" id="cParticipantes">-</div><div class="card-sub" id="cParticipantesSub"></div></div>
+    <div class="card"><div class="card-label">Captando (novo grupo)</div><div class="card-value blue" id="cCaptando">-</div><div class="card-sub" id="cCaptandoSub"></div></div>
+    <div class="card"><div class="card-label">Saidas</div><div class="card-value red" id="cSaidas">-</div><div class="card-sub" id="cSaidasSub"></div></div>
+    <div class="card"><div class="card-label">Vendas</div><div class="card-value green" id="cVendas">-</div><div class="card-sub" id="cVendasSub"></div></div>
+    <div class="card"><div class="card-label">Faturamento</div><div class="card-value accent" id="cFaturamento">-</div><div class="card-sub" id="cFaturamentoSub"></div></div>
+    <div class="card"><div class="card-label">Conversao (oferta)</div><div class="card-value" id="cConversao">-</div><div class="card-sub" id="cConversaoSub"></div></div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Grupo Ativo + Acoes -->
+    <div class="section">
+      <div class="section-title">Grupo Ativo</div>
+      <div id="grupoAtivoInfo"><span class="loading"><div class="loading-spinner"></div></span></div>
+    </div>
+
+    <!-- Compradores -->
+    <div class="section">
+      <div class="section-title">Compradores</div>
+      <div class="table-scroll" id="compradoresTable"><span class="loading"><div class="loading-spinner"></div></span></div>
+    </div>
+  </div>
+
+  <!-- Cronograma -->
+  <div class="section">
+    <div class="section-title">Cronograma de Mensagens</div>
+    <div class="tabs" id="cronogramaTabs"></div>
+    <div class="table-scroll" id="cronogramaTable"></div>
+  </div>
+
+  <!-- Todos os Meteoricos -->
+  <div class="section">
+    <div class="section-title">Todos os Meteoricos</div>
+    <div class="table-scroll" id="meteoricosTable"></div>
+  </div>
+
+  <!-- Dashboard Geral -->
+  <div class="section">
+    <div class="section-title">Dashboard Geral</div>
+    <div class="cards" id="geralCards" style="margin-bottom: 0;"></div>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://n8n-n8n.xktssy.easypanel.host/webhook/dashboard-tete-api';
+let DATA = null;
+let selectedDay = null;
+
+function fmt(n) { return new Intl.NumberFormat('pt-BR').format(n); }
+function fmtMoney(n) { return 'R$ ' + new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0 }).format(n); }
+function fmtDate(s) {
+  if (!s) return '-';
+  try {
+    const d = new Date(s);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  } catch { return s; }
+}
+function statusBadge(status) {
+  const s = (status || '').toUpperCase();
+  const cls = { 'ENVIADO': 'enviado', 'ERRO': 'erro', 'PENDENTE': 'pendente', 'PROCESSANDO': 'processando', 'IGNORAR': 'ignorar',
+    'ATIVO': 'ativo', 'CAPTANDO': 'captando', 'ENCERRADO': 'encerrado', 'FUTURO': 'futuro' }[s] || 'pendente';
+  return `<span class="badge badge-${cls}">${s || 'FUTURO'}</span>`;
+}
+
+async function loadData() {
+  try {
+    document.getElementById('updatedAt').textContent = 'Carregando...';
+    const resp = await fetch(API_URL);
+    DATA = await resp.json();
+    render();
+    document.getElementById('updatedAt').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
+  } catch (e) {
+    document.getElementById('updatedAt').textContent = 'Erro ao carregar: ' + e.message;
+  }
+}
+
+function render() {
+  if (!DATA) return;
+  const d = DATA;
+
+  // Status bar
+  const dot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  dot.className = 'status-dot ' + (d.semana_ativa.funil_ativo ? 'on' : 'off');
+
+  let statusParts = [];
+  if (d.semana_ativa.funil_ativo) {
+    statusParts.push('Funil ATIVO');
+    if (d.semana_ativa.dia_funil_atual) statusParts.push('Dia: ' + d.semana_ativa.dia_funil_atual);
+  } else {
+    statusParts.push('Funil INATIVO');
+  }
+  if (d.semana_ativa.grupo_ativo) statusParts.push('Grupo: ' + d.semana_ativa.grupo_ativo.nome);
+  statusText.innerHTML = statusParts.join(' &mdash; ');
+
+  // Cards
+  document.getElementById('cParticipantes').textContent = fmt(d.membros.participantes_grupo_ativo || d.membros.ativos);
+  document.getElementById('cParticipantesSub').textContent = d.semana_ativa.grupo_ativo ? d.semana_ativa.grupo_ativo.nome : 'Nenhum grupo ativo';
+
+  document.getElementById('cCaptando').textContent = fmt(d.membros.participantes_grupo_captando);
+  document.getElementById('cCaptandoSub').textContent = d.semana_ativa.grupo_captando ? d.semana_ativa.grupo_captando.nome : 'Nenhum';
+
+  document.getElementById('cSaidas').textContent = fmt(d.membros.saidas);
+  document.getElementById('cSaidasSub').textContent = d.membros.pct_saida + '% do total';
+
+  document.getElementById('cVendas').textContent = fmt(d.vendas.total_count);
+  document.getElementById('cVendasSub').textContent = d.oferta.conversao_pct + '% conversao';
+
+  document.getElementById('cFaturamento').textContent = fmtMoney(d.vendas.valor_total);
+  document.getElementById('cFaturamentoSub').textContent = 'Ticket medio: ' + fmtMoney(d.vendas.ticket_medio);
+
+  document.getElementById('cConversao').textContent = d.oferta.conversao_pct + '%';
+  document.getElementById('cConversaoSub').textContent = d.oferta.vendas_quinta + ' vendas / ' + d.oferta.membros_na_oferta + ' membros';
+
+  // Grupo Ativo info
+  renderGrupoAtivo();
+
+  // Compradores
+  renderCompradores();
+
+  // Cronograma
+  if (!selectedDay) {
+    // Auto-select current day or first with data
+    const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
+    const dayOfWeek = new Date().getDay();
+    const dayMap = { 1: 'Segunda', 2: 'Terca', 3: 'Quarta', 4: 'Quinta', 5: 'Sexta' };
+    selectedDay = dayMap[dayOfWeek] || 'Segunda';
+  }
+  renderCronograma();
+
+  // Meteoricos
+  renderMeteoricos();
+
+  // Geral
+  renderGeral();
+}
+
+function renderGrupoAtivo() {
+  const el = document.getElementById('grupoAtivoInfo');
+  const ga = DATA.semana_ativa.grupo_ativo;
+  if (!ga) {
+    el.innerHTML = '<p style="color: var(--muted);">Nenhum grupo ativo no momento.</p>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="margin-bottom: 12px;">
+      <span class="grupo-name">${ga.nome || 'Grupo #' + ga.num}</span>
+      ${statusBadge('ATIVO')}
+    </div>
+    <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">
+      ${ga.participantes} participantes no grupo<br>
+      JID: <code style="font-size: 0.75rem;">${ga.jid || 'N/A'}</code>
+    </p>
+    <button class="btn btn-danger" onclick="fecharGrupo('${ga.jid}')">
+      Fechar para novos leads
+    </button>
+  `;
+}
+
+async function fecharGrupo(jid) {
+  if (!jid) return alert('JID do grupo nao encontrado');
+  if (!confirm('Fechar grupo para novos leads? So admins poderao enviar mensagens.')) return;
+  try {
+    const resp = await fetch(API_URL + '?acao=fechar_grupo&grupo_jid=' + encodeURIComponent(jid));
+    const result = await resp.json();
+    if (result.ok) {
+      alert('Grupo fechado com sucesso!');
+      loadData();
+    } else {
+      alert('Erro: ' + (result.erro || 'desconhecido'));
+    }
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+function renderCompradores() {
+  const el = document.getElementById('compradoresTable');
+  const comps = DATA.compradores || [];
+  if (comps.length === 0) {
+    el.innerHTML = '<p style="color: var(--muted);">Nenhuma venda registrada.</p>';
+    return;
+  }
+  let html = `<table>
+    <thead><tr><th>Nome</th><th>Produto</th><th>Valor</th><th>Data</th></tr></thead>
+    <tbody>`;
+  for (const c of comps) {
+    html += `<tr>
+      <td>${c.nome}</td>
+      <td>${c.produto}</td>
+      <td>${fmtMoney(c.valor)}</td>
+      <td>${fmtDate(c.data)}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function renderCronograma() {
+  const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
+  const diasLabel = { Segunda: 'Seg', Terca: 'Ter', Quarta: 'Qua', Quinta: 'Qui', Sexta: 'Sex' };
+
+  // Tabs
+  let tabsHtml = '';
+  for (const dia of dias) {
+    const msgs = (DATA.cronograma[dia] || []);
+    const enviados = msgs.filter(m => m.status === 'ENVIADO').length;
+    const total = msgs.filter(m => m.status !== 'IGNORAR').length;
+    const active = dia === selectedDay ? ' active' : '';
+    tabsHtml += `<div class="tab${active}" onclick="selectDay('${dia}')">
+      ${diasLabel[dia]} <span class="tab-count">${enviados}/${total}</span>
+    </div>`;
+  }
+  document.getElementById('cronogramaTabs').innerHTML = tabsHtml;
+
+  // Table
+  const msgs = DATA.cronograma[selectedDay] || [];
+  if (msgs.length === 0) {
+    document.getElementById('cronogramaTable').innerHTML = '<p style="color: var(--muted);">Sem mensagens para este dia.</p>';
+    return;
+  }
+
+  let html = `<table>
+    <thead><tr><th>Bloco</th><th>Horario</th><th>Nome</th><th>Tipo</th><th>Status</th><th>Enviado em</th></tr></thead>
+    <tbody>`;
+  for (const m of msgs) {
+    const enviado = m.enviado_em ? fmtDate(m.enviado_em) : '-';
+    const erroTip = m.erro ? ` title="${m.erro}"` : '';
+    html += `<tr${erroTip}>
+      <td>${m.bloco_id}.${m.ordem}</td>
+      <td>${m.horario}</td>
+      <td>${m.nome}</td>
+      <td>${m.tipo}</td>
+      <td>${statusBadge(m.status)}</td>
+      <td style="font-size: 0.8rem; color: var(--muted);">${enviado}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('cronogramaTable').innerHTML = html;
+}
+
+function selectDay(dia) {
+  selectedDay = dia;
+  renderCronograma();
+}
+
+function renderMeteoricos() {
+  const el = document.getElementById('meteoricosTable');
+  const mets = DATA.meteoricos || [];
+  if (mets.length === 0) {
+    el.innerHTML = '<p style="color: var(--muted);">Nenhum meteorico registrado.</p>';
+    return;
+  }
+
+  let html = `<table>
+    <thead><tr><th>#</th><th>Nome</th><th>Status</th><th>Membros</th><th>Saidas</th><th>Vendas</th><th>Faturamento</th><th>Conversao</th></tr></thead>
+    <tbody>`;
+  for (const m of mets) {
+    html += `<tr>
+      <td>${m.grupo_num}</td>
+      <td>${m.grupo_nome || '-'}</td>
+      <td>${statusBadge(m.status)}</td>
+      <td>${m.membros_total || '-'}</td>
+      <td>${m.saidas || '-'}</td>
+      <td>${m.vendas_count || '-'}</td>
+      <td>${m.vendas_valor > 0 ? fmtMoney(m.vendas_valor) : '-'}</td>
+      <td>${m.conversao > 0 ? m.conversao + '%' : '-'}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function renderGeral() {
+  const g = DATA.geral;
+  const el = document.getElementById('geralCards');
+  el.innerHTML = `
+    <div class="card"><div class="card-label">Total de Leads</div><div class="card-value">${fmt(g.total_leads)}</div></div>
+    <div class="card"><div class="card-label">Saidas (abandono)</div><div class="card-value red">${fmt(g.total_saidas)}</div><div class="card-sub">${g.pct_abandono}% do total</div></div>
+    <div class="card"><div class="card-label">Total de Vendas</div><div class="card-value green">${fmt(g.total_vendas)}</div></div>
+    <div class="card"><div class="card-label">Faturamento Total</div><div class="card-value accent">${fmtMoney(g.valor_total)}</div></div>
+    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtMoney(g.ticket_medio)}</div></div>
+    <div class="card"><div class="card-label">Conversao Media</div><div class="card-value">${g.conversao_media}%</div></div>
+    <div class="card"><div class="card-label">Meteoricos Encerrados</div><div class="card-value">${fmt(g.meteoricos_encerrados)}</div></div>
+  `;
+}
+
+// Initial load
+loadData();
+
+// Auto-refresh every 5 min
+setInterval(loadData, 5 * 60 * 1000);
+</script>
+
+</body>
+</html>
