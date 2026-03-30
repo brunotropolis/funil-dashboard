@@ -34,9 +34,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-accent:hover { opacity: 0.9; }
 .btn-danger { border-color: var(--red); color: var(--red); }
 .btn-danger:hover { background: var(--red); color: #fff; }
+.btn-sm { padding: 5px 12px; font-size: 0.8rem; }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 .status-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
 .status-dot.off { background: var(--red); }
+
+/* Main tabs */
+.main-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+.main-tab { padding: 10px 20px; border-radius: 10px 10px 0 0; font-size: 0.9rem; font-weight: 600; cursor: pointer; background: var(--card); border: 1px solid var(--border); border-bottom: none; color: var(--muted); transition: all 0.15s; }
+.main-tab.active { background: var(--bg); border-color: var(--accent); color: var(--accent); }
+.main-tab:hover:not(.active) { color: var(--text); }
+.main-panel { display: none; }
+.main-panel.active { display: block; }
+
+/* Filter bar */
+.filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+.filter-bar label { font-size: 0.8rem; color: var(--muted); }
+.filter-bar select, .filter-bar input[type="date"] {
+  padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem;
+}
+.filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--accent); }
 
 /* Cards grid */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
@@ -66,6 +83,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .badge-erro { background: rgba(239,68,68,0.15); color: var(--red); }
 .badge-processando { background: rgba(59,130,246,0.15); color: var(--blue); }
 .badge-ignorar { background: rgba(113,113,122,0.15); color: var(--muted); }
+.badge-aguardando { background: rgba(234,179,8,0.15); color: var(--yellow); }
 
 /* Tables */
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -94,6 +112,24 @@ tr:hover td { background: rgba(139,92,246,0.05); }
 .table-scroll { overflow-x: auto; }
 
 .updated-at { font-size: 0.75rem; color: var(--muted); }
+
+/* Form */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group select {
+  width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+.form-group input::placeholder { color: var(--muted); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+.form-msg { padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px; display: none; }
+.form-msg.success { display: block; background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid var(--green); }
+.form-msg.error { display: block; background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
+
+/* Link */
+a.link-invite { color: var(--blue); text-decoration: none; font-size: 0.8rem; }
+a.link-invite:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -108,55 +144,114 @@ tr:hover td { background: rgba(139,92,246,0.05); }
     </div>
   </div>
 
-  <!-- Status bar -->
-  <div id="statusBar" class="section" style="padding: 14px 20px;">
-    <div class="grupo-bar">
-      <span class="status-dot off" id="statusDot"></span>
-      <span id="statusText">Carregando...</span>
+  <!-- Main navigation tabs -->
+  <div class="main-tabs">
+    <div class="main-tab active" onclick="switchPanel('dashboard')">Dashboard</div>
+    <div class="main-tab" onclick="switchPanel('grupos')">Grupos</div>
+  </div>
+
+  <!-- ==================== PANEL: Dashboard ==================== -->
+  <div id="panel-dashboard" class="main-panel active">
+
+    <!-- Status bar -->
+    <div id="statusBar" class="section" style="padding: 14px 20px;">
+      <div class="grupo-bar">
+        <span class="status-dot off" id="statusDot"></span>
+        <span id="statusText">Carregando...</span>
+      </div>
     </div>
-  </div>
 
-  <!-- Metric cards -->
-  <div class="cards" id="cards">
-    <div class="card"><div class="card-label">Participantes (grupo ativo)</div><div class="card-value" id="cParticipantes">-</div><div class="card-sub" id="cParticipantesSub"></div></div>
-    <div class="card"><div class="card-label">Captando (novo grupo)</div><div class="card-value blue" id="cCaptando">-</div><div class="card-sub" id="cCaptandoSub"></div></div>
-    <div class="card"><div class="card-label">Saidas</div><div class="card-value red" id="cSaidas">-</div><div class="card-sub" id="cSaidasSub"></div></div>
-    <div class="card"><div class="card-label">Vendas</div><div class="card-value green" id="cVendas">-</div><div class="card-sub" id="cVendasSub"></div></div>
-    <div class="card"><div class="card-label">Faturamento</div><div class="card-value accent" id="cFaturamento">-</div><div class="card-sub" id="cFaturamentoSub"></div></div>
-    <div class="card"><div class="card-label">Conversao (oferta)</div><div class="card-value" id="cConversao">-</div><div class="card-sub" id="cConversaoSub"></div></div>
-  </div>
+    <!-- Metric cards -->
+    <div class="cards" id="cards">
+      <div class="card"><div class="card-label">Participantes (grupo ativo)</div><div class="card-value" id="cParticipantes">-</div><div class="card-sub" id="cParticipantesSub"></div></div>
+      <div class="card"><div class="card-label">Captando (novo grupo)</div><div class="card-value blue" id="cCaptando">-</div><div class="card-sub" id="cCaptandoSub"></div></div>
+      <div class="card"><div class="card-label">Saidas</div><div class="card-value red" id="cSaidas">-</div><div class="card-sub" id="cSaidasSub"></div></div>
+      <div class="card"><div class="card-label">Vendas</div><div class="card-value green" id="cVendas">-</div><div class="card-sub" id="cVendasSub"></div></div>
+      <div class="card"><div class="card-label">Faturamento</div><div class="card-value accent" id="cFaturamento">-</div><div class="card-sub" id="cFaturamentoSub"></div></div>
+      <div class="card"><div class="card-label">Conversao (oferta)</div><div class="card-value" id="cConversao">-</div><div class="card-sub" id="cConversaoSub"></div></div>
+    </div>
 
-  <div class="grid-2">
-    <!-- Grupo Ativo + Acoes -->
+    <div class="grid-2">
+      <!-- Grupo Ativo + Acoes -->
+      <div class="section">
+        <div class="section-title">Grupo Ativo</div>
+        <div id="grupoAtivoInfo"><span class="loading"><div class="loading-spinner"></div></span></div>
+      </div>
+
+      <!-- Compradores -->
+      <div class="section">
+        <div class="section-title">Compradores</div>
+        <div class="table-scroll" id="compradoresTable"><span class="loading"><div class="loading-spinner"></div></span></div>
+      </div>
+    </div>
+
+    <!-- Cronograma -->
     <div class="section">
-      <div class="section-title">Grupo Ativo</div>
-      <div id="grupoAtivoInfo"><span class="loading"><div class="loading-spinner"></div></span></div>
+      <div class="section-title">Cronograma de Mensagens</div>
+      <div class="tabs" id="cronogramaTabs"></div>
+      <div class="table-scroll" id="cronogramaTable"></div>
     </div>
 
-    <!-- Compradores -->
+    <!-- Todos os Meteoricos -->
     <div class="section">
-      <div class="section-title">Compradores</div>
-      <div class="table-scroll" id="compradoresTable"><span class="loading"><div class="loading-spinner"></div></span></div>
+      <div class="section-title">Todos os Meteoricos</div>
+      <div class="table-scroll" id="meteoricosTable"></div>
+    </div>
+
+    <!-- Dashboard Geral -->
+    <div class="section">
+      <div class="section-title">Dashboard Geral</div>
+      <div class="cards" id="geralCards" style="margin-bottom: 0;"></div>
     </div>
   </div>
 
-  <!-- Cronograma -->
-  <div class="section">
-    <div class="section-title">Cronograma de Mensagens</div>
-    <div class="tabs" id="cronogramaTabs"></div>
-    <div class="table-scroll" id="cronogramaTable"></div>
-  </div>
+  <!-- ==================== PANEL: Grupos ==================== -->
+  <div id="panel-grupos" class="main-panel">
 
-  <!-- Todos os Meteoricos -->
-  <div class="section">
-    <div class="section-title">Todos os Meteoricos</div>
-    <div class="table-scroll" id="meteoricosTable"></div>
-  </div>
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <label>Filtrar:</label>
+      <select id="filterGrupo" onchange="renderGruposPanel()">
+        <option value="">Todos os grupos</option>
+      </select>
+      <label>Status:</label>
+      <select id="filterStatus" onchange="renderGruposPanel()">
+        <option value="">Todos</option>
+        <option value="CAPTANDO">Captando</option>
+        <option value="ATIVO">Ativo</option>
+        <option value="ENCERRADO">Encerrado</option>
+        <option value="AGUARDANDO">Aguardando</option>
+      </select>
+    </div>
 
-  <!-- Dashboard Geral -->
-  <div class="section">
-    <div class="section-title">Dashboard Geral</div>
-    <div class="cards" id="geralCards" style="margin-bottom: 0;"></div>
+    <!-- Grupos list -->
+    <div class="section">
+      <div class="section-title">Grupos Cadastrados</div>
+      <div class="table-scroll" id="gruposListTable"><span class="loading"><div class="loading-spinner"></div></span></div>
+    </div>
+
+    <!-- Cadastrar novo grupo -->
+    <div class="section">
+      <div class="section-title">Cadastrar Novo Grupo</div>
+      <div id="formMsg" class="form-msg"></div>
+      <form id="formGrupo" onsubmit="return cadastrarGrupo(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Titulo do grupo</label>
+            <input type="text" id="fNome" placeholder="Ex: SEMANA 1 - ABRIL" required>
+          </div>
+          <div class="form-group">
+            <label>JID do grupo (WhatsApp)</label>
+            <input type="text" id="fJid" placeholder="Ex: 120363406506357410@g.us" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Link de convite</label>
+          <input type="url" id="fLink" placeholder="https://chat.whatsapp.com/xxxx" required>
+        </div>
+        <button type="submit" class="btn btn-accent" id="btnCadastrar">Cadastrar Grupo</button>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -177,8 +272,16 @@ function fmtDate(s) {
 function statusBadge(status) {
   const s = (status || '').toUpperCase();
   const cls = { 'ENVIADO': 'enviado', 'ERRO': 'erro', 'PENDENTE': 'pendente', 'PROCESSANDO': 'processando', 'IGNORAR': 'ignorar',
-    'ATIVO': 'ativo', 'CAPTANDO': 'captando', 'ENCERRADO': 'encerrado', 'FUTURO': 'futuro' }[s] || 'pendente';
+    'ATIVO': 'ativo', 'CAPTANDO': 'captando', 'ENCERRADO': 'encerrado', 'FUTURO': 'futuro', 'AGUARDANDO': 'aguardando' }[s] || 'pendente';
   return `<span class="badge badge-${cls}">${s || 'FUTURO'}</span>`;
+}
+
+// Panel switching
+function switchPanel(name) {
+  document.querySelectorAll('.main-tab').forEach((t, i) => t.classList.toggle('active', t.textContent.trim().toLowerCase() === name));
+  document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'grupos' && DATA) renderGruposPanel();
 }
 
 async function loadData() {
@@ -239,7 +342,6 @@ function render() {
 
   // Cronograma
   if (!selectedDay) {
-    // Auto-select current day or first with data
     const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
     const dayOfWeek = new Date().getDay();
     const dayMap = { 1: 'Segunda', 2: 'Terca', 3: 'Quarta', 4: 'Quinta', 5: 'Sexta' };
@@ -252,6 +354,9 @@ function render() {
 
   // Geral
   renderGeral();
+
+  // Populate group filter dropdown
+  populateGrupoFilter();
 }
 
 function renderGrupoAtivo() {
@@ -320,7 +425,6 @@ function renderCronograma() {
   const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
   const diasLabel = { Segunda: 'Seg', Terca: 'Ter', Quarta: 'Qua', Quinta: 'Qui', Sexta: 'Sex' };
 
-  // Tabs
   let tabsHtml = '';
   for (const dia of dias) {
     const msgs = (DATA.cronograma[dia] || []);
@@ -333,7 +437,6 @@ function renderCronograma() {
   }
   document.getElementById('cronogramaTabs').innerHTML = tabsHtml;
 
-  // Table
   const msgs = DATA.cronograma[selectedDay] || [];
   if (msgs.length === 0) {
     document.getElementById('cronogramaTable').innerHTML = '<p style="color: var(--muted);">Sem mensagens para este dia.</p>';
@@ -403,6 +506,95 @@ function renderGeral() {
     <div class="card"><div class="card-label">Conversao Media</div><div class="card-value">${g.conversao_media}%</div></div>
     <div class="card"><div class="card-label">Meteoricos Encerrados</div><div class="card-value">${fmt(g.meteoricos_encerrados)}</div></div>
   `;
+}
+
+// ==================== GRUPOS PANEL ====================
+
+function populateGrupoFilter() {
+  const sel = document.getElementById('filterGrupo');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todos os grupos</option>';
+  const mets = DATA.meteoricos || [];
+  for (const m of mets) {
+    const name = m.grupo_nome || 'Grupo #' + m.grupo_num;
+    sel.innerHTML += `<option value="${m.grupo_num}" ${String(m.grupo_num) === current ? 'selected' : ''}>${name}</option>`;
+  }
+}
+
+function renderGruposPanel() {
+  const el = document.getElementById('gruposListTable');
+  const mets = DATA.meteoricos || [];
+  const filterNum = document.getElementById('filterGrupo').value;
+  const filterStatus = document.getElementById('filterStatus').value;
+
+  let filtered = mets;
+  if (filterNum) filtered = filtered.filter(m => String(m.grupo_num) === filterNum);
+  if (filterStatus) filtered = filtered.filter(m => (m.status || '').toUpperCase() === filterStatus);
+
+  if (filtered.length === 0) {
+    el.innerHTML = '<p style="color: var(--muted);">Nenhum grupo encontrado.</p>';
+    return;
+  }
+
+  let html = `<table>
+    <thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>JID</th><th>Link Convite</th><th>Membros</th><th>Vendas</th></tr></thead>
+    <tbody>`;
+  for (const m of filtered) {
+    const nome = m.grupo_nome || '-';
+    const link = m.invite_link ? `<a class="link-invite" href="${m.invite_link}" target="_blank">Abrir convite</a>` : '-';
+    html += `<tr>
+      <td>${m.grupo_num}</td>
+      <td style="font-weight: 600;">${nome}</td>
+      <td>${statusBadge(m.status)}</td>
+      <td><code style="font-size: 0.75rem;">${m.whatsapp_group_id || '-'}</code></td>
+      <td>${link}</td>
+      <td>${m.membros_total || '-'}</td>
+      <td>${m.vendas_count || '-'}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+async function cadastrarGrupo(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('formMsg');
+  const btn = document.getElementById('btnCadastrar');
+  const nome = document.getElementById('fNome').value.trim();
+  const jid = document.getElementById('fJid').value.trim();
+  const link = document.getElementById('fLink').value.trim();
+
+  if (!nome || !jid || !link) {
+    msgEl.className = 'form-msg error';
+    msgEl.textContent = 'Preencha todos os campos.';
+    return false;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Cadastrando...';
+  msgEl.className = 'form-msg';
+  msgEl.style.display = 'none';
+
+  try {
+    const url = API_URL + '?acao=criar_grupo&nome=' + encodeURIComponent(nome) + '&jid=' + encodeURIComponent(jid) + '&link=' + encodeURIComponent(link);
+    const resp = await fetch(url);
+    const result = await resp.json();
+    if (result.ok) {
+      msgEl.className = 'form-msg success';
+      msgEl.textContent = 'Grupo "' + nome + '" cadastrado com sucesso! (#' + (result.grupo_num || '?') + ')';
+      document.getElementById('formGrupo').reset();
+      loadData();
+    } else {
+      msgEl.className = 'form-msg error';
+      msgEl.textContent = 'Erro: ' + (result.erro || 'desconhecido');
+    }
+  } catch (err) {
+    msgEl.className = 'form-msg error';
+    msgEl.textContent = 'Erro de conexao: ' + err.message;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Cadastrar Grupo';
+  return false;
 }
 
 // Initial load
