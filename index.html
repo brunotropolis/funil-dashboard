@@ -556,7 +556,6 @@ function renderDashboard() {
     <div class="card"><div class="card-label">Conversao Media</div><div class="card-value pink">${fmtPct(conversaoMedia)}</div></div>
     <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div></div>
     <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(totalSaidas)}</div><div class="card-sub">${totalLeads > 0 ? fmtPct(totalSaidas/totalLeads*100) : '0%'} do total</div></div>
-    <div class="card"><div class="card-label">Meteoricos</div><div class="card-value">${fmt(grupos.length)}</div></div>
   `;
 
   // Vendas por produto
