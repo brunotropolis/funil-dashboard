@@ -928,12 +928,18 @@ async function fecharGrupo(jid) {
 }
 
 async function definirCaptacao(grupoNum) {
-  if (!confirm(`Definir grupo #${grupoNum} como CAPTACAO DE LEADS?\nO grupo sera aberto para novos membros.`)) return;
+  if (!confirm(`Definir grupo #${grupoNum} como CAPTACAO DE LEADS?\nO grupo sera aberto para novos membros e o link de redirecionamento sera atualizado.`)) return;
   try {
     const resp = await fetch(API_URL + '?acao=definir_captacao&grupo_num=' + grupoNum);
     const result = await resp.json();
     if (result.ok) {
-      alert(`Grupo "${result.grupo_nome}" definido como CAPTACAO!`);
+      // Update redirect page to point to this captacao group
+      if (result.invite_link) {
+        try {
+          await fetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.invite_link));
+        } catch (e) { /* non-critical */ }
+      }
+      alert(`Grupo "${result.grupo_nome}" definido como CAPTACAO!\nLink de redirecionamento atualizado.`);
       loadData();
     } else alert('Erro: ' + (result.erro||'desconhecido'));
   } catch (e) { alert('Erro: ' + e.message); }
