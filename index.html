@@ -26,6 +26,24 @@
   --accent: #2dd4a0;
   --accent-bg: rgba(45,212,160,0.12);
 }
+
+/* Club selector */
+.club-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+.club-tab {
+  flex: 1; padding: 14px 20px; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; text-align: center; border: 2px solid var(--border); background: var(--card);
+  color: var(--muted); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.club-tab .club-icon { font-size: 1.3rem; }
+.club-tab .club-name { letter-spacing: -0.01em; }
+.club-tab .club-badge { font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; background: rgba(107,107,128,0.15); text-transform: uppercase; letter-spacing: 0.04em; }
+.club-tab.active-tete { border-color: #f472b6; background: rgba(244,114,182,0.08); color: var(--text); }
+.club-tab.active-tete .club-badge { background: rgba(244,114,182,0.2); color: #f472b6; }
+.club-tab.active-soninho { border-color: #818cf8; background: rgba(129,140,248,0.08); color: var(--text); }
+.club-tab.active-soninho .club-badge { background: rgba(129,140,248,0.2); color: #818cf8; }
+.club-tab:hover:not([class*="active-"]) { border-color: var(--muted); color: var(--text); }
+.club-tab.disabled { opacity: 0.4; cursor: not-allowed; }
+.club-tab.disabled:hover { border-color: var(--border); color: var(--muted); }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
@@ -197,11 +215,23 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <h1><span>Meteorico</span> Painel</h1>
+      <h1><span>🤱</span> Clube do Tete</h1>
     </div>
     <div class="header-right">
       <span class="updated-at" id="updatedAt"></span>
       <button class="btn btn-sm" onclick="loadData()">Atualizar</button>
+    </div>
+  </div>
+
+  <!-- Club selector -->
+  <div class="club-selector">
+    <div class="club-tab active-tete" id="clubTabTete" onclick="switchClub('tete')">
+      <span class="club-icon">🤱</span>
+      <span class="club-name">Clube do Tete</span>
+    </div>
+    <div class="club-tab" id="clubTabSoninho" onclick="switchClub('soninho')">
+      <span class="club-icon">😴</span>
+      <span class="club-name">Clube do Soninho</span>
     </div>
   </div>
 
@@ -424,7 +454,30 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 </div>
 
 <script>
-const API_URL = 'https://n8n-n8n.xktssy.easypanel.host/webhook/dashboard-tete-api';
+// ===================== CLUBS CONFIG =====================
+const CLUBS = {
+  tete: {
+    id: 'tete',
+    nome: 'Clube do Tete',
+    icon: '🤱',
+    api: 'https://n8n-n8n.xktssy.easypanel.host/webhook/dashboard-tete-api',
+    enabled: true,
+    accentColor: '#f472b6',
+    redirectDomain: 'clubedotete.manualdorecemnascido.com.br'
+  },
+  soninho: {
+    id: 'soninho',
+    nome: 'Clube do Soninho',
+    icon: '😴',
+    api: 'https://n8n-n8n.xktssy.easypanel.host/webhook/dashboard-soninho-api',
+    enabled: true,
+    accentColor: '#818cf8',
+    redirectDomain: 'clubedosoninho.manualdorecemnascido.com.br'
+  }
+};
+
+let currentClub = 'tete';
+let API_URL = CLUBS.tete.api;
 let DATA = null;
 let selectedGrupo = null;
 
@@ -447,6 +500,34 @@ function statusBadge(status) {
 function grupoStatus(g) {
   if (!g.jid) return 'AGUARDANDO JID';
   return (g.status || 'AGUARDANDO').toUpperCase();
+}
+
+// ===================== CLUB SWITCHING =====================
+function switchClub(clubId) {
+  const club = CLUBS[clubId];
+  if (!club || !club.enabled) return;
+  if (clubId === currentClub) return;
+
+  currentClub = clubId;
+  API_URL = club.api;
+  DATA = null;
+  selectedGrupo = null;
+
+  // Update club tabs visual
+  document.querySelectorAll('.club-tab').forEach(t => {
+    t.className = 'club-tab';
+  });
+  const activeTab = document.getElementById('clubTab' + clubId.charAt(0).toUpperCase() + clubId.slice(1));
+  if (activeTab) activeTab.classList.add('active-' + clubId);
+
+  // Update header name
+  document.querySelector('.header-left h1').innerHTML = `<span>${club.icon}</span> ${club.nome}`;
+
+  // Reset to dashboard tab
+  switchTab('dashboard');
+
+  // Load data from new API
+  loadData();
 }
 
 // ===================== TAB SWITCHING =====================
