@@ -252,6 +252,9 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
   <!-- ===================== TAB: GRUPOS ===================== -->
   <div id="tab-grupos" class="main-panel">
     <div id="gruposListView">
+      <!-- Status boxes -->
+      <div id="statusFunilBoxes" class="cards" style="margin-bottom: 20px;"></div>
+
       <div class="section-header" style="margin-bottom: 16px;">
         <div class="section-title"><span class="icon">📱</span> Grupos Cadastrados</div>
         <button class="btn btn-green btn-sm" onclick="openModal('modalGrupo')">+ Novo Grupo</button>
@@ -595,8 +598,48 @@ function renderDashboard() {
 }
 
 // ===================== GRUPOS TAB =====================
+function renderStatusFunil() {
+  const el = document.getElementById('statusFunilBoxes');
+  if (!DATA) { el.innerHTML = ''; return; }
+  const sf = DATA.status_funil || {};
+  const cap = sf.captacao;
+  const met = sf.meteorico;
+
+  let html = '';
+  // Captacao card
+  html += `<div class="card" style="border-left: 3px solid var(--green);">
+    <div class="card-label" style="color:var(--green);">📢 CAPTACAO DE LEADS</div>`;
+  if (cap) {
+    html += `<div class="card-value" style="font-size:1rem;">${cap.nome}</div>
+      <div class="card-sub" style="margin-top:4px;">
+        <code style="font-size:0.7rem;">${(cap.jid||'').substring(0,18)}...</code>
+        ${cap.invite_link ? `<br><a href="${cap.invite_link}" target="_blank" style="color:var(--blue);font-size:0.75rem;">Link convite</a>` : ''}
+      </div>
+      <button class="btn btn-danger btn-sm" style="margin-top:8px;font-size:0.72rem;" onclick="iniciarMeteorico(${cap.grupo_num})">🚀 Iniciar Meteorico</button>`;
+  } else {
+    html += `<div class="card-value" style="font-size:0.9rem;color:var(--muted);">Nenhum grupo</div>
+      <div class="card-sub">Selecione um grupo abaixo</div>`;
+  }
+  html += '</div>';
+
+  // Meteorico card
+  html += `<div class="card" style="border-left: 3px solid var(--pink);">
+    <div class="card-label" style="color:var(--pink);">🚀 METEORICO ATIVO</div>`;
+  if (met) {
+    html += `<div class="card-value" style="font-size:1rem;">${met.nome}</div>
+      <div class="card-sub"><code style="font-size:0.7rem;">${(met.jid||'').substring(0,18)}...</code></div>`;
+  } else {
+    html += `<div class="card-value" style="font-size:0.9rem;color:var(--muted);">Nenhum grupo</div>
+      <div class="card-sub">Inicie um meteorico acima</div>`;
+  }
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
 function renderGruposList() {
   if (!DATA) return;
+  renderStatusFunil();
   const el = document.getElementById('gruposListContent');
   let grupos = [...(DATA.grupos || [])];
   const filterStatus = document.getElementById('grupoFilterStatus').value;
@@ -605,16 +648,23 @@ function renderGruposList() {
 
   if (grupos.length === 0) { el.innerHTML = '<div class="section"><div class="empty">Nenhum grupo encontrado.</div></div>'; return; }
   let html = '<div class="section"><div class="table-scroll"><table>';
-  html += '<thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>JID</th><th>Leads</th><th>Vendas</th><th>Faturamento</th><th>Link</th></tr></thead><tbody>';
+  html += '<thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>Leads</th><th>Vendas</th><th>Faturamento</th><th>Acao</th></tr></thead><tbody>';
   grupos.forEach(g => {
     const gStatus = grupoStatus(g);
-    const link = g.invite_link ? `<a href="${g.invite_link}" target="_blank" style="color:var(--blue);text-decoration:none;font-size:0.78rem;">Abrir</a>` : '-';
-    const jidShort = g.jid ? `<span style="font-size:0.72rem;color:var(--muted);" title="${g.jid}">${g.jid.substring(0,12)}...</span>` : '<span style="font-size:0.72rem;color:var(--red);">Pendente</span>';
+    let acaoBtn = '';
+    if (gStatus === 'AGUARDANDO' && g.jid) {
+      acaoBtn = `<button class="btn btn-green btn-sm" style="font-size:0.7rem;padding:3px 8px;" onclick="event.stopPropagation();definirCaptacao(${g.grupo_num})">Abrir Captacao</button>`;
+    } else if (gStatus === 'CAPTANDO') {
+      acaoBtn = `<button class="btn btn-danger btn-sm" style="font-size:0.7rem;padding:3px 8px;" onclick="event.stopPropagation();iniciarMeteorico(${g.grupo_num})">Iniciar Meteorico</button>`;
+    } else if (gStatus === 'AGUARDANDO JID') {
+      acaoBtn = '<span style="font-size:0.7rem;color:var(--red);">Sem JID</span>';
+    } else {
+      acaoBtn = '-';
+    }
     html += `<tr class="clickable" onclick="openGrupoDetail(${g.grupo_num})">
       <td>${g.grupo_num}</td><td style="font-weight:600;">${g.nome||'-'}</td><td>${statusBadge(gStatus)}</td>
-      <td>${jidShort}</td>
       <td>${fmt(g.leads_total)}</td><td>${fmt(g.vendas_count)}</td><td>${g.vendas_valor>0?fmtMoney(g.vendas_valor):'-'}</td>
-      <td onclick="event.stopPropagation()">${link}</td>
+      <td onclick="event.stopPropagation()">${acaoBtn}</td>
     </tr>`;
   });
   html += '</tbody></table></div></div>';
@@ -874,6 +924,36 @@ async function fecharGrupo(jid) {
     const result = await resp.json();
     if (result.ok) { alert('Grupo fechado!'); loadData(); }
     else alert('Erro: ' + (result.erro||'desconhecido'));
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+async function definirCaptacao(grupoNum) {
+  if (!confirm(`Definir grupo #${grupoNum} como CAPTACAO DE LEADS?\nO grupo sera aberto para novos membros.`)) return;
+  try {
+    const resp = await fetch(API_URL + '?acao=definir_captacao&grupo_num=' + grupoNum);
+    const result = await resp.json();
+    if (result.ok) {
+      alert(`Grupo "${result.grupo_nome}" definido como CAPTACAO!`);
+      loadData();
+    } else alert('Erro: ' + (result.erro||'desconhecido'));
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+async function iniciarMeteorico(grupoNum) {
+  if (!confirm(`INICIAR METEORICO no grupo #${grupoNum}?\n\nIsso vai:\n• Fechar o grupo para novos leads\n• Marcar como ATIVO para disparos\n• Atualizar o link de redirecionamento`)) return;
+  try {
+    const resp = await fetch(API_URL + '?acao=iniciar_meteorico&grupo_num=' + grupoNum);
+    const result = await resp.json();
+    if (result.ok) {
+      // Update redirect page if there's a captacao group
+      if (result.redirect_invite) {
+        try {
+          await fetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.redirect_invite));
+        } catch (e) { /* non-critical */ }
+      }
+      alert(`Meteorico iniciado no grupo "${result.grupo_nome}"!\nGrupo fechado para novos leads.`);
+      loadData();
+    } else alert('Erro: ' + (result.erro||'desconhecido'));
   } catch (e) { alert('Erro: ' + e.message); }
 }
 
