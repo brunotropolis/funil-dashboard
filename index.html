@@ -257,13 +257,14 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
         <button class="btn btn-green btn-sm" onclick="openModal('modalGrupo')">+ Novo Grupo</button>
       </div>
       <div class="filter-bar">
-        <label>Status:</label>
+        <label>STATUS:</label>
         <select id="grupoFilterStatus" onchange="renderGruposList()">
           <option value="">Todos</option>
           <option value="CAPTANDO">Captando</option>
           <option value="ATIVO">Ativo</option>
           <option value="ENCERRADO">Encerrado</option>
           <option value="AGUARDANDO">Aguardando</option>
+          <option value="AGUARDANDO JID">Aguardando JID</option>
         </select>
       </div>
       <div id="gruposListContent"></div>
@@ -432,8 +433,13 @@ function fmtDate(s) {
 function statusBadge(status) {
   const s = (status || '').toUpperCase();
   const map = { ENVIADO:'enviado', ERRO:'erro', PENDENTE:'pendente', PROCESSANDO:'processando', IGNORAR:'ignorar',
-    ATIVO:'ativo', CAPTANDO:'captando', ENCERRADO:'encerrado', AGUARDANDO:'aguardando', FILA:'fila', READY:'pendente', POSTADO:'enviado' };
+    ATIVO:'ativo', CAPTANDO:'captando', ENCERRADO:'encerrado', AGUARDANDO:'aguardando', FILA:'fila', READY:'pendente', POSTADO:'enviado',
+    'AGUARDANDO JID':'erro' };
   return `<span class="badge badge-${map[s]||'pendente'}">${s||'—'}</span>`;
+}
+function grupoStatus(g) {
+  if (!g.jid) return 'AGUARDANDO JID';
+  return (g.status || 'AGUARDANDO').toUpperCase();
 }
 
 // ===================== TAB SWITCHING =====================
@@ -594,16 +600,19 @@ function renderGruposList() {
   const el = document.getElementById('gruposListContent');
   let grupos = [...(DATA.grupos || [])];
   const filterStatus = document.getElementById('grupoFilterStatus').value;
-  if (filterStatus) grupos = grupos.filter(g => (g.status||'').toUpperCase() === filterStatus);
+  if (filterStatus) grupos = grupos.filter(g => grupoStatus(g) === filterStatus);
   grupos.sort((a,b) => (b.grupo_num||0) - (a.grupo_num||0));
 
   if (grupos.length === 0) { el.innerHTML = '<div class="section"><div class="empty">Nenhum grupo encontrado.</div></div>'; return; }
   let html = '<div class="section"><div class="table-scroll"><table>';
-  html += '<thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>Leads</th><th>Vendas</th><th>Faturamento</th><th>Link</th></tr></thead><tbody>';
+  html += '<thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>JID</th><th>Leads</th><th>Vendas</th><th>Faturamento</th><th>Link</th></tr></thead><tbody>';
   grupos.forEach(g => {
+    const gStatus = grupoStatus(g);
     const link = g.invite_link ? `<a href="${g.invite_link}" target="_blank" style="color:var(--blue);text-decoration:none;font-size:0.78rem;">Abrir</a>` : '-';
+    const jidShort = g.jid ? `<span style="font-size:0.72rem;color:var(--muted);" title="${g.jid}">${g.jid.substring(0,12)}...</span>` : '<span style="font-size:0.72rem;color:var(--red);">Pendente</span>';
     html += `<tr class="clickable" onclick="openGrupoDetail(${g.grupo_num})">
-      <td>${g.grupo_num}</td><td style="font-weight:600;">${g.nome||'-'}</td><td>${statusBadge(g.status)}</td>
+      <td>${g.grupo_num}</td><td style="font-weight:600;">${g.nome||'-'}</td><td>${statusBadge(gStatus)}</td>
+      <td>${jidShort}</td>
       <td>${fmt(g.leads_total)}</td><td>${fmt(g.vendas_count)}</td><td>${g.vendas_valor>0?fmtMoney(g.vendas_valor):'-'}</td>
       <td onclick="event.stopPropagation()">${link}</td>
     </tr>`;
@@ -633,13 +642,14 @@ function renderGrupoDetail() {
   let html = '';
 
   // Header
+  const gStatus = grupoStatus(g);
   html += `<div class="grupo-detail-header">
     <h2>${g.nome || 'Grupo #'+g.grupo_num}</h2>
-    ${statusBadge(g.status)}
-    ${g.status === 'CAPTANDO' ? `<button class="btn btn-danger btn-sm" onclick="fecharGrupo('${g.jid}')">Fechar para leads</button>` : ''}
+    ${statusBadge(gStatus)}
+    ${g.jid && g.status === 'CAPTANDO' ? `<button class="btn btn-danger btn-sm" onclick="fecharGrupo('${g.jid}')">Fechar para leads</button>` : ''}
   </div>`;
   html += `<div style="font-size:0.78rem;color:var(--muted);margin-bottom:16px;">
-    JID: <code>${g.jid||'N/A'}</code>
+    JID: <code>${g.jid||'Pendente — cadastre com link de convite valido'}</code>
     ${g.invite_link ? ` — <a href="${g.invite_link}" target="_blank" style="color:var(--blue);">Link convite</a>` : ''}
   </div>`;
 
@@ -846,9 +856,10 @@ async function cadastrarGrupo(e) {
     const result = await resp.json();
     if (result.ok) {
       msgEl.className = 'form-msg success';
-      msgEl.textContent = `Grupo "${nome}" cadastrado! (#${result.grupo_num||'?'}) — JID: ${result.jid||'pendente'}`;
+      const jidMsg = result.jid ? `JID resolvido: ${result.jid}` : 'JID pendente — verifique se o link de convite esta correto';
+      msgEl.textContent = `Grupo "${nome}" cadastrado! (#${result.grupo_num||'?'}) — ${jidMsg}`;
       e.target.reset();
-      setTimeout(() => { closeModal('modalGrupo'); loadData(); }, 1500);
+      setTimeout(() => { closeModal('modalGrupo'); loadData(); }, 2000);
     } else { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + (result.erro||'desconhecido'); }
   } catch (err) { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + err.message; }
   btn.disabled = false; btn.textContent = 'Cadastrar Grupo';
