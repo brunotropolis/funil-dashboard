@@ -50,6 +50,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 .btn-green:hover { opacity: 0.9; }
 .btn-danger { border-color: var(--red); color: var(--red); }
 .btn-danger:hover { background: var(--red); color: #fff; }
+.btn-meteorico { background: linear-gradient(135deg, #6366f1, #8b5cf6); border-color: #6366f1; color: #fff; font-weight: 600; }
+.btn-meteorico:hover { opacity: 0.9; background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+.btn-captacao { background: linear-gradient(135deg, #06b6d4, #2dd4a0); border-color: #06b6d4; color: #000; font-weight: 600; }
+.btn-captacao:hover { opacity: 0.9; }
 .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
 
 /* Main tabs */
@@ -615,7 +619,7 @@ function renderStatusFunil() {
         <code style="font-size:0.7rem;">${(cap.jid||'').substring(0,18)}...</code>
         ${cap.invite_link ? `<br><a href="${cap.invite_link}" target="_blank" style="color:var(--blue);font-size:0.75rem;">Link convite</a>` : ''}
       </div>
-      <button class="btn btn-danger btn-sm" style="margin-top:8px;font-size:0.72rem;" onclick="iniciarMeteorico(${cap.grupo_num})">🚀 Iniciar Meteorico</button>`;
+      <button class="btn btn-meteorico btn-sm" style="margin-top:8px;font-size:0.72rem;" onclick="iniciarMeteorico(${cap.grupo_num})">🚀 Iniciar Meteorico</button>`;
   } else {
     html += `<div class="card-value" style="font-size:0.9rem;color:var(--muted);">Nenhum grupo</div>
       <div class="card-sub">Selecione um grupo abaixo</div>`;
@@ -653,9 +657,9 @@ function renderGruposList() {
     const gStatus = grupoStatus(g);
     let acaoBtn = '';
     if (gStatus === 'AGUARDANDO' && g.jid) {
-      acaoBtn = `<button class="btn btn-green btn-sm" style="font-size:0.7rem;padding:3px 8px;" onclick="event.stopPropagation();definirCaptacao(${g.grupo_num})">Abrir Captacao</button>`;
+      acaoBtn = `<button class="btn btn-captacao btn-sm" style="font-size:0.7rem;padding:3px 8px;" onclick="event.stopPropagation();definirCaptacao(${g.grupo_num})">📢 Abrir Captacao</button>`;
     } else if (gStatus === 'CAPTANDO') {
-      acaoBtn = `<button class="btn btn-danger btn-sm" style="font-size:0.7rem;padding:3px 8px;" onclick="event.stopPropagation();iniciarMeteorico(${g.grupo_num})">Iniciar Meteorico</button>`;
+      acaoBtn = `<button class="btn btn-meteorico btn-sm" style="font-size:0.7rem;padding:3px 8px;" onclick="event.stopPropagation();iniciarMeteorico(${g.grupo_num})">🚀 Iniciar Meteorico</button>`;
     } else if (gStatus === 'AGUARDANDO JID') {
       acaoBtn = '<span style="font-size:0.7rem;color:var(--red);">Sem JID</span>';
     } else {
