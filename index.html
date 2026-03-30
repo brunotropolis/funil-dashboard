@@ -3,133 +3,188 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Funil Meteorico</title>
+<title>Painel Meteorico</title>
 <style>
 :root {
-  --bg: #0f1117;
-  --card: #1a1d27;
-  --border: #2a2d3a;
-  --text: #e4e4e7;
-  --muted: #71717a;
-  --accent: #8b5cf6;
-  --green: #22c55e;
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --card: #16161e;
+  --card-hover: #1c1c26;
+  --border: #2a2a3a;
+  --text: #e8e8ef;
+  --muted: #6b6b80;
+  --green: #2dd4a0;
+  --green-bg: rgba(45,212,160,0.12);
   --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.12);
   --yellow: #eab308;
+  --yellow-bg: rgba(234,179,8,0.12);
   --blue: #3b82f6;
+  --blue-bg: rgba(59,130,246,0.12);
   --pink: #ec4899;
+  --pink-bg: rgba(236,72,153,0.12);
+  --accent: #2dd4a0;
+  --accent-bg: rgba(45,212,160,0.12);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 16px 20px; }
 
 /* Header */
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-.header h1 { font-size: 1.5rem; font-weight: 700; }
-.header h1 span { color: var(--accent); }
-.header-actions { display: flex; gap: 8px; align-items: center; }
-.btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
-.btn:hover { border-color: var(--accent); }
-.btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-accent:hover { opacity: 0.9; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-left h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+.header-left h1 span { color: var(--green); }
+.header-right { display: flex; gap: 8px; align-items: center; }
+.updated-at { font-size: 0.72rem; color: var(--muted); }
+
+/* Buttons */
+.btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--green); background: var(--card-hover); }
+.btn-green { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
+.btn-green:hover { opacity: 0.9; }
 .btn-danger { border-color: var(--red); color: var(--red); }
 .btn-danger:hover { background: var(--red); color: #fff; }
-.btn-sm { padding: 5px 12px; font-size: 0.8rem; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-.status-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.status-dot.off { background: var(--red); }
+.btn-sm { padding: 4px 10px; font-size: 0.75rem; }
 
 /* Main tabs */
-.main-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
-.main-tab { padding: 10px 20px; border-radius: 10px 10px 0 0; font-size: 0.9rem; font-weight: 600; cursor: pointer; background: var(--card); border: 1px solid var(--border); border-bottom: none; color: var(--muted); transition: all 0.15s; }
-.main-tab.active { background: var(--bg); border-color: var(--accent); color: var(--accent); }
-.main-tab:hover:not(.active) { color: var(--text); }
+.main-tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--card); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+.main-tab { flex: 1; padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.15s; text-align: center; border: none; background: transparent; }
+.main-tab.active { background: var(--green); color: #000; }
+.main-tab:hover:not(.active) { color: var(--text); background: var(--bg); }
 .main-panel { display: none; }
 .main-panel.active { display: block; }
 
-/* Filter bar */
-.filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
-.filter-bar label { font-size: 0.8rem; color: var(--muted); }
-.filter-bar select, .filter-bar input[type="date"] {
-  padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem;
-}
-.filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--accent); }
-
 /* Cards grid */
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-.card-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.card-value { font-size: 1.8rem; font-weight: 700; }
-.card-sub { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; transition: border-color 0.15s; }
+.card:hover { border-color: var(--green); }
+.card-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.card-value { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+.card-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
 .card-value.green { color: var(--green); }
 .card-value.red { color: var(--red); }
 .card-value.blue { color: var(--blue); }
-.card-value.accent { color: var(--accent); }
+.card-value.pink { color: var(--pink); }
+.card-value.yellow { color: var(--yellow); }
 
-/* Sections */
-.section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-.section-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+/* Section */
+.section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.section-title { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.section-title .icon { font-size: 1.1rem; }
 
-/* Grupo info bar */
-.grupo-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.grupo-bar .grupo-name { font-size: 1.1rem; font-weight: 600; }
-.badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-.badge-ativo { background: rgba(34,197,94,0.15); color: var(--green); }
-.badge-captando { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-encerrado { background: rgba(113,113,122,0.15); color: var(--muted); }
-.badge-futuro { background: rgba(139,92,246,0.15); color: var(--accent); }
-.badge-pendente { background: rgba(234,179,8,0.15); color: var(--yellow); }
-.badge-enviado { background: rgba(34,197,94,0.15); color: var(--green); }
-.badge-erro { background: rgba(239,68,68,0.15); color: var(--red); }
-.badge-processando { background: rgba(59,130,246,0.15); color: var(--blue); }
-.badge-ignorar { background: rgba(113,113,122,0.15); color: var(--muted); }
-.badge-aguardando { background: rgba(234,179,8,0.15); color: var(--yellow); }
+/* Badges */
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.badge-ativo, .badge-enviado { background: var(--green-bg); color: var(--green); }
+.badge-captando, .badge-processando { background: var(--blue-bg); color: var(--blue); }
+.badge-encerrado { background: rgba(107,107,128,0.15); color: var(--muted); }
+.badge-aguardando, .badge-pendente, .badge-fila { background: var(--yellow-bg); color: var(--yellow); }
+.badge-erro { background: var(--red-bg); color: var(--red); }
+.badge-ignorar { background: rgba(107,107,128,0.1); color: var(--muted); }
 
 /* Tables */
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
-td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(139,92,246,0.05); }
-
-/* Tabs */
-.tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
-.tab { padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; background: transparent; border: 1px solid var(--border); color: var(--muted); transition: all 0.15s; }
-.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.tab:hover:not(.active) { border-color: var(--accent); color: var(--text); }
-.tab-count { font-size: 0.7rem; opacity: 0.7; margin-left: 4px; }
-
-/* Loading */
-.loading { text-align: center; padding: 40px; color: var(--muted); }
-.loading-spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Grid 2 cols */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
-
-/* Scroll */
 .table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+td { padding: 8px 10px; border-bottom: 1px solid rgba(42,42,58,0.5); }
+tr:last-child td { border-bottom: none; }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 
-.updated-at { font-size: 0.75rem; color: var(--muted); }
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
+
+/* Filters */
+.filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.filter-bar label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.filter-bar select, .filter-bar input { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.82rem; }
+.filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--green); }
+
+/* Tabs (sub) */
+.tabs { display: flex; gap: 3px; margin-bottom: 14px; flex-wrap: wrap; }
+.tab { padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; background: transparent; border: 1px solid var(--border); color: var(--muted); transition: all 0.15s; }
+.tab.active { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
+.tab:hover:not(.active) { border-color: var(--green); color: var(--text); }
+.tab-count { font-size: 0.68rem; opacity: 0.7; margin-left: 3px; }
+
+/* Modal */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.modal-close { margin-left: auto; cursor: pointer; color: var(--muted); font-size: 1.3rem; background: none; border: none; padding: 4px; }
+.modal-close:hover { color: var(--text); }
 
 /* Form */
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-.form-group input, .form-group select {
-  width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem;
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; font-family: inherit;
 }
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
-.form-group input::placeholder { color: var(--muted); }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
-.form-msg { padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px; display: none; }
-.form-msg.success { display: block; background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid var(--green); }
-.form-msg.error { display: block; background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--green); }
+.form-group input::placeholder, .form-group textarea::placeholder { color: var(--muted); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+.form-hint { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+.form-msg { padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 12px; display: none; }
+.form-msg.success { display: block; background: var(--green-bg); color: var(--green); border: 1px solid rgba(45,212,160,0.3); }
+.form-msg.error { display: block; background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
 
-/* Link */
-a.link-invite { color: var(--blue); text-decoration: none; font-size: 0.8rem; }
-a.link-invite:hover { text-decoration: underline; }
+/* Toggle switch */
+.toggle { position: relative; width: 36px; height: 20px; cursor: pointer; display: inline-block; }
+.toggle input { display: none; }
+.toggle-slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); border-radius: 20px; transition: 0.2s; }
+.toggle-slider:before { content: ''; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background: var(--muted); border-radius: 50%; transition: 0.2s; }
+.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(16px); background: #000; }
+
+/* Back button */
+.back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.85rem; cursor: pointer; margin-bottom: 16px; background: none; border: none; font-family: inherit; }
+.back-btn:hover { color: var(--green); }
+
+/* Detail header */
+.grupo-detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.grupo-detail-header h2 { font-size: 1.2rem; font-weight: 700; }
+
+/* Produto row */
+.produto-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(42,42,58,0.5); }
+.produto-row:last-child { border-bottom: none; }
+.produto-info { flex: 1; }
+.produto-nome { font-weight: 600; font-size: 0.9rem; }
+.produto-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.produto-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Loading / empty */
+.loading { text-align: center; padding: 30px; color: var(--muted); }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { text-align: center; padding: 30px; color: var(--muted); font-size: 0.85rem; }
+
+/* Vendas breakdown item */
+.venda-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(42,42,58,0.3); }
+.venda-item:last-child { border-bottom: none; }
+.venda-item-left { display: flex; align-items: center; gap: 8px; }
+.venda-item-qty { background: var(--green-bg); color: var(--green); padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; min-width: 32px; text-align: center; }
+.venda-item-name { font-size: 0.85rem; }
+.venda-item-value { font-weight: 600; color: var(--green); font-size: 0.85rem; }
+
+/* Error detail */
+.erro-detail { max-width: 200px; font-size: 0.72rem; color: var(--red); word-break: break-word; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container { padding: 12px; }
+  .main-tab { font-size: 0.75rem; padding: 8px 8px; }
+}
 </style>
 </head>
 <body>
@@ -137,472 +192,716 @@ a.link-invite:hover { text-decoration: underline; }
 <div class="container">
   <!-- Header -->
   <div class="header">
-    <h1><span>Funil Meteorico</span> Dashboard</h1>
-    <div class="header-actions">
+    <div class="header-left">
+      <h1><span>Meteorico</span> Painel</h1>
+    </div>
+    <div class="header-right">
       <span class="updated-at" id="updatedAt"></span>
-      <button class="btn" onclick="loadData()">Atualizar</button>
+      <button class="btn btn-sm" onclick="loadData()">Atualizar</button>
     </div>
   </div>
 
-  <!-- Main navigation tabs -->
+  <!-- Main tabs -->
   <div class="main-tabs">
-    <div class="main-tab active" onclick="switchPanel('dashboard')">Dashboard</div>
-    <div class="main-tab" onclick="switchPanel('grupos')">Grupos</div>
+    <div class="main-tab active" onclick="switchTab('dashboard')">Dashboard</div>
+    <div class="main-tab" onclick="switchTab('grupos')">Grupos</div>
+    <div class="main-tab" onclick="switchTab('produtos')">Produtos</div>
+    <div class="main-tab" onclick="switchTab('interacoes')">Interacoes</div>
   </div>
 
-  <!-- ==================== PANEL: Dashboard ==================== -->
-  <div id="panel-dashboard" class="main-panel active">
-
-    <!-- Status bar -->
-    <div id="statusBar" class="section" style="padding: 14px 20px;">
-      <div class="grupo-bar">
-        <span class="status-dot off" id="statusDot"></span>
-        <span id="statusText">Carregando...</span>
-      </div>
-    </div>
-
-    <!-- Metric cards -->
-    <div class="cards" id="cards">
-      <div class="card"><div class="card-label">Participantes (grupo ativo)</div><div class="card-value" id="cParticipantes">-</div><div class="card-sub" id="cParticipantesSub"></div></div>
-      <div class="card"><div class="card-label">Captando (novo grupo)</div><div class="card-value blue" id="cCaptando">-</div><div class="card-sub" id="cCaptandoSub"></div></div>
-      <div class="card"><div class="card-label">Saidas</div><div class="card-value red" id="cSaidas">-</div><div class="card-sub" id="cSaidasSub"></div></div>
-      <div class="card"><div class="card-label">Vendas</div><div class="card-value green" id="cVendas">-</div><div class="card-sub" id="cVendasSub"></div></div>
-      <div class="card"><div class="card-label">Faturamento</div><div class="card-value accent" id="cFaturamento">-</div><div class="card-sub" id="cFaturamentoSub"></div></div>
-      <div class="card"><div class="card-label">Conversao (oferta)</div><div class="card-value" id="cConversao">-</div><div class="card-sub" id="cConversaoSub"></div></div>
-    </div>
-
-    <div class="grid-2">
-      <!-- Grupo Ativo + Acoes -->
-      <div class="section">
-        <div class="section-title">Grupo Ativo</div>
-        <div id="grupoAtivoInfo"><span class="loading"><div class="loading-spinner"></div></span></div>
-      </div>
-
-      <!-- Compradores -->
-      <div class="section">
-        <div class="section-title">Compradores</div>
-        <div class="table-scroll" id="compradoresTable"><span class="loading"><div class="loading-spinner"></div></span></div>
-      </div>
-    </div>
-
-    <!-- Cronograma -->
-    <div class="section">
-      <div class="section-title">Cronograma de Mensagens</div>
-      <div class="tabs" id="cronogramaTabs"></div>
-      <div class="table-scroll" id="cronogramaTable"></div>
-    </div>
-
-    <!-- Todos os Meteoricos -->
-    <div class="section">
-      <div class="section-title">Todos os Meteoricos</div>
-      <div class="table-scroll" id="meteoricosTable"></div>
-    </div>
-
-    <!-- Dashboard Geral -->
-    <div class="section">
-      <div class="section-title">Dashboard Geral</div>
-      <div class="cards" id="geralCards" style="margin-bottom: 0;"></div>
-    </div>
-  </div>
-
-  <!-- ==================== PANEL: Grupos ==================== -->
-  <div id="panel-grupos" class="main-panel">
-
-    <!-- Filter bar -->
+  <!-- ===================== TAB: DASHBOARD ===================== -->
+  <div id="tab-dashboard" class="main-panel active">
     <div class="filter-bar">
-      <label>Filtrar:</label>
-      <select id="filterGrupo" onchange="renderGruposPanel()">
+      <label>Periodo:</label>
+      <select id="dashPeriodo" onchange="renderDashboard()">
+        <option value="todos">Todos</option>
+        <option value="semana">Esta semana</option>
+        <option value="mes">Este mes</option>
+      </select>
+      <label>Grupo:</label>
+      <select id="dashGrupo" onchange="renderDashboard()">
         <option value="">Todos os grupos</option>
       </select>
-      <label>Status:</label>
-      <select id="filterStatus" onchange="renderGruposPanel()">
+    </div>
+
+    <div class="cards" id="dashCards"></div>
+
+    <div class="grid-2">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title"><span class="icon">💰</span> Vendas por Produto</div>
+        </div>
+        <div id="dashVendasProduto"></div>
+      </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title"><span class="icon">📊</span> Resumo Geral</div>
+        </div>
+        <div id="dashResumo"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="icon">🚀</span> Todos os Meteoricos</div>
+      </div>
+      <div class="table-scroll" id="dashMeteoricosList"></div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: GRUPOS ===================== -->
+  <div id="tab-grupos" class="main-panel">
+    <div id="gruposListView">
+      <div class="section-header" style="margin-bottom: 16px;">
+        <div class="section-title"><span class="icon">📱</span> Grupos Cadastrados</div>
+        <button class="btn btn-green btn-sm" onclick="openModal('modalGrupo')">+ Novo Grupo</button>
+      </div>
+      <div class="filter-bar">
+        <label>Status:</label>
+        <select id="grupoFilterStatus" onchange="renderGruposList()">
+          <option value="">Todos</option>
+          <option value="CAPTANDO">Captando</option>
+          <option value="ATIVO">Ativo</option>
+          <option value="ENCERRADO">Encerrado</option>
+          <option value="AGUARDANDO">Aguardando</option>
+        </select>
+      </div>
+      <div id="gruposListContent"></div>
+    </div>
+
+    <div id="grupoDetailView" style="display: none;">
+      <button class="back-btn" onclick="closeGrupoDetail()">← Voltar para lista</button>
+      <div id="grupoDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: PRODUTOS ===================== -->
+  <div id="tab-produtos" class="main-panel">
+    <div class="section-header" style="margin-bottom: 16px;">
+      <div class="section-title"><span class="icon">📦</span> Produtos Cadastrados</div>
+      <button class="btn btn-green btn-sm" onclick="openModal('modalProduto')">+ Novo Produto</button>
+    </div>
+    <div id="produtosListContent"></div>
+  </div>
+
+  <!-- ===================== TAB: INTERACOES ===================== -->
+  <div id="tab-interacoes" class="main-panel">
+    <div class="section-header" style="margin-bottom: 16px;">
+      <div class="section-title"><span class="icon">💬</span> Interacoes dos Leads</div>
+    </div>
+    <div class="filter-bar">
+      <label>Grupo:</label>
+      <select id="interGrupo" onchange="renderInteracoes()">
+        <option value="">Selecione um grupo</option>
+      </select>
+      <label>Dia:</label>
+      <select id="interDia" onchange="renderInteracoes()">
         <option value="">Todos</option>
-        <option value="CAPTANDO">Captando</option>
-        <option value="ATIVO">Ativo</option>
-        <option value="ENCERRADO">Encerrado</option>
-        <option value="AGUARDANDO">Aguardando</option>
+        <option value="Quarta">Quarta (Q&amp;A)</option>
+        <option value="Quinta">Quinta (Carrinho)</option>
       </select>
     </div>
-
-    <!-- Grupos list -->
     <div class="section">
-      <div class="section-title">Grupos Cadastrados</div>
-      <div class="table-scroll" id="gruposListTable"><span class="loading"><div class="loading-spinner"></div></span></div>
+      <div id="interacoesContent">
+        <div class="empty">Selecione um grupo para ver as interacoes dos leads.</div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <!-- Cadastrar novo grupo -->
-    <div class="section">
-      <div class="section-title">Cadastrar Novo Grupo</div>
-      <div id="formMsg" class="form-msg"></div>
-      <form id="formGrupo" onsubmit="return cadastrarGrupo(event)">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Titulo do grupo</label>
-            <input type="text" id="fNome" placeholder="Ex: SEMANA 1 - ABRIL" required>
-          </div>
-          <div class="form-group">
-            <label>JID do grupo (WhatsApp)</label>
-            <input type="text" id="fJid" placeholder="Ex: 120363406506357410@g.us" required>
-          </div>
+<!-- ===================== MODAL: Novo Grupo ===================== -->
+<div class="modal-overlay" id="modalGrupo">
+  <div class="modal">
+    <div class="modal-title">
+      <span>📱</span> Cadastrar Novo Grupo
+      <button class="modal-close" onclick="closeModal('modalGrupo')">&times;</button>
+    </div>
+    <div id="grupoFormMsg" class="form-msg"></div>
+    <form onsubmit="return cadastrarGrupo(event)">
+      <div class="form-group">
+        <label>Titulo do grupo</label>
+        <input type="text" id="fGrupoNome" placeholder="Ex: SEMANA 1 - ABRIL" required>
+      </div>
+      <div class="form-group">
+        <label>Link de convite do WhatsApp</label>
+        <input type="url" id="fGrupoLink" placeholder="https://chat.whatsapp.com/xxxx" required>
+        <div class="form-hint">Cole o link de convite. O JID sera resolvido automaticamente.</div>
+      </div>
+      <button type="submit" class="btn btn-green" id="btnCadastrarGrupo" style="width: 100%; justify-content: center;">Cadastrar Grupo</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: Novo Produto ===================== -->
+<div class="modal-overlay" id="modalProduto">
+  <div class="modal">
+    <div class="modal-title">
+      <span>📦</span> Cadastrar Novo Produto
+      <button class="modal-close" onclick="closeModal('modalProduto')">&times;</button>
+    </div>
+    <div id="produtoFormMsg" class="form-msg"></div>
+    <form onsubmit="return cadastrarProduto(event)">
+      <div class="form-group">
+        <label>Nome do produto</label>
+        <input type="text" id="fProdNome" placeholder="Ex: Combo Amamentacao" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="fProdTipo" required>
+            <option value="combo">Combo</option>
+            <option value="consulta">Consulta</option>
+            <option value="curso">Curso</option>
+          </select>
         </div>
         <div class="form-group">
-          <label>Link de convite</label>
-          <input type="url" id="fLink" placeholder="https://chat.whatsapp.com/xxxx" required>
+          <label>Preco (R$)</label>
+          <input type="text" id="fProdPreco" placeholder="Ex: 197.00">
         </div>
-        <button type="submit" class="btn btn-accent" id="btnCadastrar">Cadastrar Grupo</button>
-      </form>
+      </div>
+      <div class="form-group">
+        <label>Link Greenn</label>
+        <input type="url" id="fProdLink" placeholder="https://greenn.com.br/...">
+        <div class="form-hint">Link do produto na plataforma Greenn.</div>
+      </div>
+      <div class="form-group">
+        <label>Mensagem pos-compra (WhatsApp)</label>
+        <textarea id="fProdMsg" placeholder="Mensagem enviada ao comprador. Use {nome} para o nome e {produto} para o produto."></textarea>
+        <div class="form-hint">Variaveis: {nome}, {produto}. Suporta *negrito* do WhatsApp.</div>
+      </div>
+      <button type="submit" class="btn btn-green" id="btnCadastrarProd" style="width: 100%; justify-content: center;">Cadastrar Produto</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: Editar Produto ===================== -->
+<div class="modal-overlay" id="modalEditProduto">
+  <div class="modal">
+    <div class="modal-title">
+      <span>✏️</span> Editar Produto
+      <button class="modal-close" onclick="closeModal('modalEditProduto')">&times;</button>
     </div>
+    <div id="editProdFormMsg" class="form-msg"></div>
+    <form onsubmit="return editarProduto(event)">
+      <input type="hidden" id="fEditProdId">
+      <div class="form-group">
+        <label>Nome do produto</label>
+        <input type="text" id="fEditProdNome" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="fEditProdTipo">
+            <option value="combo">Combo</option>
+            <option value="consulta">Consulta</option>
+            <option value="curso">Curso</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preco (R$)</label>
+          <input type="text" id="fEditProdPreco">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Link Greenn</label>
+        <input type="url" id="fEditProdLink">
+      </div>
+      <div class="form-group">
+        <label>Mensagem pos-compra (WhatsApp)</label>
+        <textarea id="fEditProdMsg"></textarea>
+      </div>
+      <button type="submit" class="btn btn-green" id="btnEditProd" style="width: 100%; justify-content: center;">Salvar Alteracoes</button>
+    </form>
   </div>
 </div>
 
 <script>
 const API_URL = 'https://n8n-n8n.xktssy.easypanel.host/webhook/dashboard-tete-api';
 let DATA = null;
-let selectedDay = null;
+let selectedGrupo = null;
 
-function fmt(n) { return new Intl.NumberFormat('pt-BR').format(n); }
-function fmtMoney(n) { return 'R$ ' + new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0 }).format(n); }
+// ===================== UTILS =====================
+function fmt(n) { return new Intl.NumberFormat('pt-BR').format(n || 0); }
+function fmtMoney(n) { return 'R$ ' + new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0); }
+function fmtPct(n) { return (n || 0).toFixed(1) + '%'; }
 function fmtDate(s) {
   if (!s) return '-';
-  try {
-    const d = new Date(s);
-    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  } catch { return s; }
+  try { const d = new Date(s); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); }
+  catch { return s; }
 }
 function statusBadge(status) {
   const s = (status || '').toUpperCase();
-  const cls = { 'ENVIADO': 'enviado', 'ERRO': 'erro', 'PENDENTE': 'pendente', 'PROCESSANDO': 'processando', 'IGNORAR': 'ignorar',
-    'ATIVO': 'ativo', 'CAPTANDO': 'captando', 'ENCERRADO': 'encerrado', 'FUTURO': 'futuro', 'AGUARDANDO': 'aguardando' }[s] || 'pendente';
-  return `<span class="badge badge-${cls}">${s || 'FUTURO'}</span>`;
+  const map = { ENVIADO:'enviado', ERRO:'erro', PENDENTE:'pendente', PROCESSANDO:'processando', IGNORAR:'ignorar',
+    ATIVO:'ativo', CAPTANDO:'captando', ENCERRADO:'encerrado', AGUARDANDO:'aguardando', FILA:'fila', READY:'pendente', POSTADO:'enviado' };
+  return `<span class="badge badge-${map[s]||'pendente'}">${s||'—'}</span>`;
 }
 
-// Panel switching
-function switchPanel(name) {
-  document.querySelectorAll('.main-tab').forEach((t, i) => t.classList.toggle('active', t.textContent.trim().toLowerCase() === name));
+// ===================== TAB SWITCHING =====================
+function switchTab(name) {
+  document.querySelectorAll('.main-tab').forEach((t, i) => {
+    const tabNames = ['dashboard','grupos','produtos','interacoes'];
+    t.classList.toggle('active', tabNames[i] === name);
+  });
   document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'grupos' && DATA) renderGruposPanel();
+  const el = document.getElementById('tab-' + name);
+  if (el) el.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'grupos') renderGruposList();
+  if (name === 'produtos') renderProdutos();
+  if (name === 'interacoes') renderInteracoes();
 }
 
+// ===================== MODAL =====================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ===================== DATA LOADING =====================
 async function loadData() {
   try {
     document.getElementById('updatedAt').textContent = 'Carregando...';
     const resp = await fetch(API_URL);
     DATA = await resp.json();
-    render();
+    renderAll();
     document.getElementById('updatedAt').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
   } catch (e) {
-    document.getElementById('updatedAt').textContent = 'Erro ao carregar: ' + e.message;
+    document.getElementById('updatedAt').textContent = 'Erro: ' + e.message;
   }
 }
 
-function render() {
+function renderAll() {
   if (!DATA) return;
-  const d = DATA;
+  populateFilters();
+  renderDashboard();
+  renderGruposList();
+  renderProdutos();
+  if (selectedGrupo) renderGrupoDetail();
+}
 
-  // Status bar
-  const dot = document.getElementById('statusDot');
-  const statusText = document.getElementById('statusText');
-  dot.className = 'status-dot ' + (d.semana_ativa.funil_ativo ? 'on' : 'off');
+function populateFilters() {
+  const grupos = DATA.grupos || [];
+  // Dashboard group filter
+  const dashSel = document.getElementById('dashGrupo');
+  const prev = dashSel.value;
+  dashSel.innerHTML = '<option value="">Todos os grupos</option>';
+  grupos.forEach(g => {
+    dashSel.innerHTML += `<option value="${g.grupo_num}" ${String(g.grupo_num)===prev?'selected':''}>${g.nome || 'Grupo #'+g.grupo_num}</option>`;
+  });
+  // Interacoes group filter
+  const interSel = document.getElementById('interGrupo');
+  const prevI = interSel.value;
+  interSel.innerHTML = '<option value="">Selecione um grupo</option>';
+  grupos.forEach(g => {
+    interSel.innerHTML += `<option value="${g.grupo_num}" ${String(g.grupo_num)===prevI?'selected':''}>${g.nome || 'Grupo #'+g.grupo_num}</option>`;
+  });
+}
 
-  let statusParts = [];
-  if (d.semana_ativa.funil_ativo) {
-    statusParts.push('Funil ATIVO');
-    if (d.semana_ativa.dia_funil_atual) statusParts.push('Dia: ' + d.semana_ativa.dia_funil_atual);
+// ===================== DASHBOARD TAB =====================
+function renderDashboard() {
+  if (!DATA) return;
+  const d = DATA.dashboard || {};
+  const filtroGrupo = document.getElementById('dashGrupo').value;
+  let grupos = DATA.grupos || [];
+
+  let totalLeads = 0, totalSaidas = 0, totalVendas = 0, faturamento = 0;
+  let vendasPorProduto = {};
+  let conversaoMedia = 0;
+
+  if (filtroGrupo) {
+    // Filtered by specific group
+    const fg = grupos.filter(g => String(g.grupo_num) === filtroGrupo);
+    fg.forEach(g => {
+      totalLeads += g.leads_total || 0;
+      totalSaidas += g.leads_saidas || 0;
+      totalVendas += g.vendas_count || 0;
+      faturamento += g.vendas_valor || 0;
+      conversaoMedia = g.conversao_pct || 0;
+      (g.vendas_por_produto || []).forEach(v => {
+        if (!vendasPorProduto[v.nome]) vendasPorProduto[v.nome] = { count: 0, valor: 0 };
+        vendasPorProduto[v.nome].count += v.count || 0;
+        vendasPorProduto[v.nome].valor += v.valor || 0;
+      });
+    });
   } else {
-    statusParts.push('Funil INATIVO');
+    totalLeads = d.total_leads || 0;
+    totalSaidas = d.total_saidas || 0;
+    totalVendas = d.total_vendas || 0;
+    faturamento = d.faturamento_total || 0;
+    conversaoMedia = d.conversao_media || 0;
+    vendasPorProduto = d.vendas_por_produto || {};
   }
-  if (d.semana_ativa.grupo_ativo) statusParts.push('Grupo: ' + d.semana_ativa.grupo_ativo.nome);
-  statusText.innerHTML = statusParts.join(' &mdash; ');
+
+  const ticketMedio = totalVendas > 0 ? faturamento / totalVendas : 0;
 
   // Cards
-  document.getElementById('cParticipantes').textContent = fmt(d.membros.participantes_grupo_ativo || d.membros.ativos);
-  document.getElementById('cParticipantesSub').textContent = d.semana_ativa.grupo_ativo ? d.semana_ativa.grupo_ativo.nome : 'Nenhum grupo ativo';
-
-  document.getElementById('cCaptando').textContent = fmt(d.membros.participantes_grupo_captando);
-  document.getElementById('cCaptandoSub').textContent = d.semana_ativa.grupo_captando ? d.semana_ativa.grupo_captando.nome : 'Nenhum';
-
-  document.getElementById('cSaidas').textContent = fmt(d.membros.saidas);
-  document.getElementById('cSaidasSub').textContent = d.membros.pct_saida + '% do total';
-
-  document.getElementById('cVendas').textContent = fmt(d.vendas.total_count);
-  document.getElementById('cVendasSub').textContent = d.oferta.conversao_pct + '% conversao';
-
-  document.getElementById('cFaturamento').textContent = fmtMoney(d.vendas.valor_total);
-  document.getElementById('cFaturamentoSub').textContent = 'Ticket medio: ' + fmtMoney(d.vendas.ticket_medio);
-
-  document.getElementById('cConversao').textContent = d.oferta.conversao_pct + '%';
-  document.getElementById('cConversaoSub').textContent = d.oferta.vendas_quinta + ' vendas / ' + d.oferta.membros_na_oferta + ' membros';
-
-  // Grupo Ativo info
-  renderGrupoAtivo();
-
-  // Compradores
-  renderCompradores();
-
-  // Cronograma
-  if (!selectedDay) {
-    const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
-    const dayOfWeek = new Date().getDay();
-    const dayMap = { 1: 'Segunda', 2: 'Terca', 3: 'Quarta', 4: 'Quinta', 5: 'Sexta' };
-    selectedDay = dayMap[dayOfWeek] || 'Segunda';
-  }
-  renderCronograma();
-
-  // Meteoricos
-  renderMeteoricos();
-
-  // Geral
-  renderGeral();
-
-  // Populate group filter dropdown
-  populateGrupoFilter();
-}
-
-function renderGrupoAtivo() {
-  const el = document.getElementById('grupoAtivoInfo');
-  const ga = DATA.semana_ativa.grupo_ativo;
-  if (!ga) {
-    el.innerHTML = '<p style="color: var(--muted);">Nenhum grupo ativo no momento.</p>';
-    return;
-  }
-
-  el.innerHTML = `
-    <div style="margin-bottom: 12px;">
-      <span class="grupo-name">${ga.nome || 'Grupo #' + ga.num}</span>
-      ${statusBadge('ATIVO')}
-    </div>
-    <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">
-      ${ga.participantes} participantes no grupo<br>
-      JID: <code style="font-size: 0.75rem;">${ga.jid || 'N/A'}</code>
-    </p>
-    <button class="btn btn-danger" onclick="fecharGrupo('${ga.jid}')">
-      Fechar para novos leads
-    </button>
+  document.getElementById('dashCards').innerHTML = `
+    <div class="card"><div class="card-label">Faturamento Total</div><div class="card-value green">${fmtMoney(faturamento)}</div></div>
+    <div class="card"><div class="card-label">Total de Vendas</div><div class="card-value green">${fmt(totalVendas)}</div></div>
+    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtMoney(ticketMedio)}</div></div>
+    <div class="card"><div class="card-label">Conversao Media</div><div class="card-value pink">${fmtPct(conversaoMedia)}</div></div>
+    <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div></div>
+    <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(totalSaidas)}</div><div class="card-sub">${totalLeads > 0 ? fmtPct(totalSaidas/totalLeads*100) : '0%'} do total</div></div>
+    <div class="card"><div class="card-label">Meteoricos</div><div class="card-value">${fmt(grupos.length)}</div></div>
   `;
-}
 
-async function fecharGrupo(jid) {
-  if (!jid) return alert('JID do grupo nao encontrado');
-  if (!confirm('Fechar grupo para novos leads? So admins poderao enviar mensagens.')) return;
-  try {
-    const resp = await fetch(API_URL + '?acao=fechar_grupo&grupo_jid=' + encodeURIComponent(jid));
-    const result = await resp.json();
-    if (result.ok) {
-      alert('Grupo fechado com sucesso!');
-      loadData();
-    } else {
-      alert('Erro: ' + (result.erro || 'desconhecido'));
-    }
-  } catch (e) {
-    alert('Erro: ' + e.message);
+  // Vendas por produto
+  const vpEl = document.getElementById('dashVendasProduto');
+  const vpKeys = Object.keys(vendasPorProduto);
+  if (vpKeys.length === 0) {
+    vpEl.innerHTML = '<div class="empty">Nenhuma venda registrada.</div>';
+  } else {
+    let html = '';
+    vpKeys.forEach(nome => {
+      const v = vendasPorProduto[nome];
+      html += `<div class="venda-item">
+        <div class="venda-item-left"><span class="venda-item-qty">${v.count||0}</span><span class="venda-item-name">${nome}</span></div>
+        <span class="venda-item-value">${fmtMoney(v.valor||0)}</span>
+      </div>`;
+    });
+    vpEl.innerHTML = html;
   }
-}
 
-function renderCompradores() {
-  const el = document.getElementById('compradoresTable');
-  const comps = DATA.compradores || [];
-  if (comps.length === 0) {
-    el.innerHTML = '<p style="color: var(--muted);">Nenhuma venda registrada.</p>';
-    return;
-  }
-  let html = `<table>
-    <thead><tr><th>Nome</th><th>Produto</th><th>Valor</th><th>Data</th></tr></thead>
-    <tbody>`;
-  for (const c of comps) {
-    html += `<tr>
-      <td>${c.nome}</td>
-      <td>${c.produto}</td>
-      <td>${fmtMoney(c.valor)}</td>
-      <td>${fmtDate(c.data)}</td>
-    </tr>`;
-  }
-  html += '</tbody></table>';
-  el.innerHTML = html;
-}
-
-function renderCronograma() {
-  const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
-  const diasLabel = { Segunda: 'Seg', Terca: 'Ter', Quarta: 'Qua', Quinta: 'Qui', Sexta: 'Sex' };
-
-  let tabsHtml = '';
-  for (const dia of dias) {
-    const msgs = (DATA.cronograma[dia] || []);
-    const enviados = msgs.filter(m => m.status === 'ENVIADO').length;
-    const total = msgs.filter(m => m.status !== 'IGNORAR').length;
-    const active = dia === selectedDay ? ' active' : '';
-    tabsHtml += `<div class="tab${active}" onclick="selectDay('${dia}')">
-      ${diasLabel[dia]} <span class="tab-count">${enviados}/${total}</span>
+  // Resumo
+  document.getElementById('dashResumo').innerHTML = `
+    <div style="display: grid; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);"><span style="color:var(--muted);">Meteoricos realizados</span><span style="font-weight: 600;">${fmt(grupos.length)}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);"><span style="color:var(--muted);">Total de leads</span><span style="font-weight: 600;">${fmt(totalLeads)}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);"><span style="color:var(--muted);">Saidas (abandono)</span><span style="font-weight: 600; color:var(--red);">${fmt(totalSaidas)}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);"><span style="color:var(--muted);">Faturamento total</span><span style="font-weight: 600; color:var(--green);">${fmtMoney(faturamento)}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color:var(--muted);">Ticket medio</span><span style="font-weight: 600;">${fmtMoney(ticketMedio)}</span></div>
     </div>`;
-  }
-  document.getElementById('cronogramaTabs').innerHTML = tabsHtml;
 
-  const msgs = DATA.cronograma[selectedDay] || [];
-  if (msgs.length === 0) {
-    document.getElementById('cronogramaTable').innerHTML = '<p style="color: var(--muted);">Sem mensagens para este dia.</p>';
-    return;
-  }
-
-  let html = `<table>
-    <thead><tr><th>Bloco</th><th>Horario</th><th>Nome</th><th>Tipo</th><th>Status</th><th>Enviado em</th></tr></thead>
-    <tbody>`;
-  for (const m of msgs) {
-    const enviado = m.enviado_em ? fmtDate(m.enviado_em) : '-';
-    const erroTip = m.erro ? ` title="${m.erro}"` : '';
-    html += `<tr${erroTip}>
-      <td>${m.bloco_id}.${m.ordem}</td>
-      <td>${m.horario}</td>
-      <td>${m.nome}</td>
-      <td>${m.tipo}</td>
-      <td>${statusBadge(m.status)}</td>
-      <td style="font-size: 0.8rem; color: var(--muted);">${enviado}</td>
+  // Meteoricos table
+  const mel = document.getElementById('dashMeteoricosList');
+  if (grupos.length === 0) { mel.innerHTML = '<div class="empty">Nenhum meteorico registrado.</div>'; return; }
+  let html = `<table><thead><tr><th>#</th><th>Nome</th><th>Status</th><th>Leads</th><th>Saidas</th><th>Dia Oferta</th><th>Vendas</th><th>Faturamento</th><th>Conversao</th></tr></thead><tbody>`;
+  grupos.forEach(g => {
+    html += `<tr class="clickable" onclick="switchTab('grupos');setTimeout(()=>openGrupoDetail(${g.grupo_num}),50)">
+      <td>${g.grupo_num}</td><td style="font-weight:600;">${g.nome||'-'}</td><td>${statusBadge(g.status)}</td>
+      <td>${fmt(g.leads_total)}</td><td>${fmt(g.leads_saidas)}</td><td>${fmt(g.leads_dia_oferta)}</td>
+      <td>${fmt(g.vendas_count)}</td><td>${g.vendas_valor>0?fmtMoney(g.vendas_valor):'-'}</td><td>${g.conversao_pct>0?fmtPct(g.conversao_pct):'-'}</td>
     </tr>`;
-  }
+  });
   html += '</tbody></table>';
-  document.getElementById('cronogramaTable').innerHTML = html;
+  mel.innerHTML = html;
 }
 
-function selectDay(dia) {
-  selectedDay = dia;
-  renderCronograma();
-}
+// ===================== GRUPOS TAB =====================
+function renderGruposList() {
+  if (!DATA) return;
+  const el = document.getElementById('gruposListContent');
+  let grupos = [...(DATA.grupos || [])];
+  const filterStatus = document.getElementById('grupoFilterStatus').value;
+  if (filterStatus) grupos = grupos.filter(g => (g.status||'').toUpperCase() === filterStatus);
+  grupos.sort((a,b) => (b.grupo_num||0) - (a.grupo_num||0));
 
-function renderMeteoricos() {
-  const el = document.getElementById('meteoricosTable');
-  const mets = DATA.meteoricos || [];
-  if (mets.length === 0) {
-    el.innerHTML = '<p style="color: var(--muted);">Nenhum meteorico registrado.</p>';
-    return;
-  }
-
-  let html = `<table>
-    <thead><tr><th>#</th><th>Nome</th><th>Status</th><th>Membros</th><th>Saidas</th><th>Vendas</th><th>Faturamento</th><th>Conversao</th></tr></thead>
-    <tbody>`;
-  for (const m of mets) {
-    html += `<tr>
-      <td>${m.grupo_num}</td>
-      <td>${m.grupo_nome || '-'}</td>
-      <td>${statusBadge(m.status)}</td>
-      <td>${m.membros_total || '-'}</td>
-      <td>${m.saidas || '-'}</td>
-      <td>${m.vendas_count || '-'}</td>
-      <td>${m.vendas_valor > 0 ? fmtMoney(m.vendas_valor) : '-'}</td>
-      <td>${m.conversao > 0 ? m.conversao + '%' : '-'}</td>
+  if (grupos.length === 0) { el.innerHTML = '<div class="section"><div class="empty">Nenhum grupo encontrado.</div></div>'; return; }
+  let html = '<div class="section"><div class="table-scroll"><table>';
+  html += '<thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>Leads</th><th>Vendas</th><th>Faturamento</th><th>Link</th></tr></thead><tbody>';
+  grupos.forEach(g => {
+    const link = g.invite_link ? `<a href="${g.invite_link}" target="_blank" style="color:var(--blue);text-decoration:none;font-size:0.78rem;">Abrir</a>` : '-';
+    html += `<tr class="clickable" onclick="openGrupoDetail(${g.grupo_num})">
+      <td>${g.grupo_num}</td><td style="font-weight:600;">${g.nome||'-'}</td><td>${statusBadge(g.status)}</td>
+      <td>${fmt(g.leads_total)}</td><td>${fmt(g.vendas_count)}</td><td>${g.vendas_valor>0?fmtMoney(g.vendas_valor):'-'}</td>
+      <td onclick="event.stopPropagation()">${link}</td>
     </tr>`;
-  }
-  html += '</tbody></table>';
+  });
+  html += '</tbody></table></div></div>';
   el.innerHTML = html;
 }
 
-function renderGeral() {
-  const g = DATA.geral;
-  const el = document.getElementById('geralCards');
-  el.innerHTML = `
-    <div class="card"><div class="card-label">Total de Leads</div><div class="card-value">${fmt(g.total_leads)}</div></div>
-    <div class="card"><div class="card-label">Saidas (abandono)</div><div class="card-value red">${fmt(g.total_saidas)}</div><div class="card-sub">${g.pct_abandono}% do total</div></div>
-    <div class="card"><div class="card-label">Total de Vendas</div><div class="card-value green">${fmt(g.total_vendas)}</div></div>
-    <div class="card"><div class="card-label">Faturamento Total</div><div class="card-value accent">${fmtMoney(g.valor_total)}</div></div>
-    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtMoney(g.ticket_medio)}</div></div>
-    <div class="card"><div class="card-label">Conversao Media</div><div class="card-value">${g.conversao_media}%</div></div>
-    <div class="card"><div class="card-label">Meteoricos Encerrados</div><div class="card-value">${fmt(g.meteoricos_encerrados)}</div></div>
-  `;
+function openGrupoDetail(grupoNum) {
+  selectedGrupo = grupoNum;
+  document.getElementById('gruposListView').style.display = 'none';
+  document.getElementById('grupoDetailView').style.display = 'block';
+  renderGrupoDetail();
 }
 
-// ==================== GRUPOS PANEL ====================
-
-function populateGrupoFilter() {
-  const sel = document.getElementById('filterGrupo');
-  const current = sel.value;
-  sel.innerHTML = '<option value="">Todos os grupos</option>';
-  const mets = DATA.meteoricos || [];
-  for (const m of mets) {
-    const name = m.grupo_nome || 'Grupo #' + m.grupo_num;
-    sel.innerHTML += `<option value="${m.grupo_num}" ${String(m.grupo_num) === current ? 'selected' : ''}>${name}</option>`;
-  }
+function closeGrupoDetail() {
+  selectedGrupo = null;
+  document.getElementById('gruposListView').style.display = 'block';
+  document.getElementById('grupoDetailView').style.display = 'none';
 }
 
-function renderGruposPanel() {
-  const el = document.getElementById('gruposListTable');
-  const mets = DATA.meteoricos || [];
-  const filterNum = document.getElementById('filterGrupo').value;
-  const filterStatus = document.getElementById('filterStatus').value;
+function renderGrupoDetail() {
+  const el = document.getElementById('grupoDetailContent');
+  const g = (DATA.grupos || []).find(x => x.grupo_num === selectedGrupo);
+  if (!g) { el.innerHTML = '<div class="empty">Grupo nao encontrado.</div>'; return; }
 
-  let filtered = mets;
-  if (filterNum) filtered = filtered.filter(m => String(m.grupo_num) === filterNum);
-  if (filterStatus) filtered = filtered.filter(m => (m.status || '').toUpperCase() === filterStatus);
+  let html = '';
 
-  if (filtered.length === 0) {
-    el.innerHTML = '<p style="color: var(--muted);">Nenhum grupo encontrado.</p>';
-    return;
+  // Header
+  html += `<div class="grupo-detail-header">
+    <h2>${g.nome || 'Grupo #'+g.grupo_num}</h2>
+    ${statusBadge(g.status)}
+    ${g.status === 'CAPTANDO' ? `<button class="btn btn-danger btn-sm" onclick="fecharGrupo('${g.jid}')">Fechar para leads</button>` : ''}
+  </div>`;
+  html += `<div style="font-size:0.78rem;color:var(--muted);margin-bottom:16px;">
+    JID: <code>${g.jid||'N/A'}</code>
+    ${g.invite_link ? ` — <a href="${g.invite_link}" target="_blank" style="color:var(--blue);">Link convite</a>` : ''}
+  </div>`;
+
+  // Metrics
+  html += `<div class="cards">
+    <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(g.leads_total)}</div></div>
+    <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(g.leads_saidas)}</div><div class="card-sub">Excl. remocoes por compra</div></div>
+    <div class="card"><div class="card-label">Leads Dia da Oferta</div><div class="card-value">${fmt(g.leads_dia_oferta)}</div><div class="card-sub">Quinta-feira 9h</div></div>
+    <div class="card"><div class="card-label">Conversao</div><div class="card-value pink">${fmtPct(g.conversao_pct)}</div><div class="card-sub">${fmt(g.vendas_count)} vendas / ${fmt(g.leads_dia_oferta)} leads</div></div>
+    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value green">${fmtMoney(g.ticket_medio)}</div></div>
+    <div class="card"><div class="card-label">Faturamento</div><div class="card-value green">${fmtMoney(g.vendas_valor)}</div></div>
+  </div>`;
+
+  // Vendas por produto + Compradores
+  html += '<div class="grid-2">';
+  const vp = g.vendas_por_produto || [];
+  html += `<div class="section"><div class="section-header"><div class="section-title">💰 Vendas por Produto</div></div>`;
+  if (vp.length === 0) { html += '<div class="empty">Nenhuma venda.</div>'; }
+  else {
+    vp.forEach(v => {
+      html += `<div class="venda-item"><div class="venda-item-left"><span class="venda-item-qty">${v.count}</span><span class="venda-item-name">${v.nome}</span></div><span class="venda-item-value">${fmtMoney(v.valor)}</span></div>`;
+    });
+    html += `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;"><span style="font-weight:600;">Total</span><span style="font-weight:700;color:var(--green);">${fmtMoney(g.vendas_valor)}</span></div>`;
   }
+  html += '</div>';
 
-  let html = `<table>
-    <thead><tr><th>#</th><th>Titulo</th><th>Status</th><th>JID</th><th>Link Convite</th><th>Membros</th><th>Vendas</th></tr></thead>
-    <tbody>`;
-  for (const m of filtered) {
-    const nome = m.grupo_nome || '-';
-    const link = m.invite_link ? `<a class="link-invite" href="${m.invite_link}" target="_blank">Abrir convite</a>` : '-';
-    html += `<tr>
-      <td>${m.grupo_num}</td>
-      <td style="font-weight: 600;">${nome}</td>
-      <td>${statusBadge(m.status)}</td>
-      <td><code style="font-size: 0.75rem;">${m.whatsapp_group_id || '-'}</code></td>
-      <td>${link}</td>
-      <td>${m.membros_total || '-'}</td>
-      <td>${m.vendas_count || '-'}</td>
-    </tr>`;
+  const comps = g.compradores || [];
+  html += `<div class="section"><div class="section-header"><div class="section-title">🛒 Compradores</div></div>`;
+  if (comps.length === 0) { html += '<div class="empty">Nenhum comprador.</div>'; }
+  else {
+    html += '<div class="table-scroll"><table><thead><tr><th>Nome</th><th>Produto</th><th>Valor</th><th>Data</th></tr></thead><tbody>';
+    comps.forEach(c => {
+      html += `<tr><td>${c.nome}</td><td>${c.produto}</td><td>${fmtMoney(c.valor)}</td><td style="font-size:0.75rem;color:var(--muted);">${fmtDate(c.data)}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
   }
-  html += '</tbody></table>';
+  html += '</div></div>';
+
+  // Disparos
+  html += `<div class="section"><div class="section-header"><div class="section-title">📨 Disparos</div></div>`;
+  const disparos = g.disparos || {};
+  const dias = ['Segunda','Terca','Quarta','Quinta','Sexta'];
+  const diasLabel = {Segunda:'Seg',Terca:'Ter',Quarta:'Qua',Quinta:'Qui',Sexta:'Sex'};
+
+  html += '<div class="tabs">';
+  dias.forEach((dia, i) => {
+    const msgs = disparos[dia] || [];
+    const env = msgs.filter(m => (m.status||'').toUpperCase()==='ENVIADO').length;
+    const errs = msgs.filter(m => (m.status||'').toUpperCase()==='ERRO').length;
+    html += `<div class="tab${i===0?' active':''}" onclick="selectDisparoDay('${dia}',this)">${diasLabel[dia]} <span class="tab-count">${env}/${msgs.length}${errs>0?' ⚠':''}</span></div>`;
+  });
+  html += '</div>';
+
+  dias.forEach((dia, i) => {
+    const msgs = disparos[dia] || [];
+    html += `<div class="disparo-day" id="disparo-${dia}" style="display:${i===0?'block':'none'};">`;
+    if (msgs.length === 0) { html += '<div class="empty">Sem disparos.</div>'; }
+    else {
+      html += '<div class="table-scroll"><table><thead><tr><th>Bloco</th><th>Horario</th><th>Nome</th><th>Tipo</th><th>Status</th><th>Enviado</th><th>Erro</th></tr></thead><tbody>';
+      msgs.forEach(m => {
+        html += `<tr>
+          <td>${m.bloco_id||'-'}.${m.ordem||'-'}</td><td>${m.horario||'-'}</td><td>${m.nome||'-'}</td><td>${m.tipo||'-'}</td>
+          <td>${statusBadge(m.status)}</td><td style="font-size:0.75rem;color:var(--muted);">${m.enviado_em?fmtDate(m.enviado_em):'-'}</td>
+          <td>${m.erro?`<div class="erro-detail">${m.erro}</div>`:'-'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+
   el.innerHTML = html;
 }
 
-async function cadastrarGrupo(e) {
-  e.preventDefault();
-  const msgEl = document.getElementById('formMsg');
-  const btn = document.getElementById('btnCadastrar');
-  const nome = document.getElementById('fNome').value.trim();
-  const jid = document.getElementById('fJid').value.trim();
-  const link = document.getElementById('fLink').value.trim();
+function selectDisparoDay(dia, tabEl) {
+  tabEl.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.querySelectorAll('.disparo-day').forEach(d => d.style.display = 'none');
+  const dayEl = document.getElementById('disparo-' + dia);
+  if (dayEl) dayEl.style.display = 'block';
+}
 
-  if (!nome || !jid || !link) {
-    msgEl.className = 'form-msg error';
-    msgEl.textContent = 'Preencha todos os campos.';
-    return false;
-  }
+// ===================== PRODUTOS TAB =====================
+function renderProdutos() {
+  if (!DATA) return;
+  const el = document.getElementById('produtosListContent');
+  const produtos = DATA.produtos || [];
+  if (produtos.length === 0) { el.innerHTML = '<div class="section"><div class="empty">Nenhum produto cadastrado.</div></div>'; return; }
 
-  btn.disabled = true;
-  btn.textContent = 'Cadastrando...';
-  msgEl.className = 'form-msg';
-  msgEl.style.display = 'none';
+  let html = '<div class="section">';
+  produtos.forEach(p => {
+    const ativo = (p.ativo||'').toUpperCase() === 'SIM';
+    html += `<div class="produto-row">
+      <div class="produto-info">
+        <div class="produto-nome">${p.nome||p.produto_id}</div>
+        <div class="produto-meta">
+          ${p.tipo?`Tipo: ${p.tipo}`:''}
+          ${p.preco?` — ${fmtMoney(parseFloat(p.preco))}`:''}
+          ${p.valor_liquido?` — Liquido: ${fmtMoney(parseFloat(p.valor_liquido))}`:''}
+          ${p.link_greenn?` — <a href="${p.link_greenn}" target="_blank" style="color:var(--blue);">Greenn</a>`:''}
+        </div>
+        ${p.mensagem_pos_compra?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;max-width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Msg: ${p.mensagem_pos_compra}</div>`:''}
+      </div>
+      <div class="produto-actions">
+        <label class="toggle" title="${ativo?'Ativo':'Inativo'}">
+          <input type="checkbox" ${ativo?'checked':''} onchange="toggleProduto('${p.produto_id}',this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn btn-sm" onclick="openEditProduto('${p.produto_id}')">Editar</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
 
+function openEditProduto(produtoId) {
+  const p = (DATA.produtos||[]).find(x => x.produto_id === produtoId);
+  if (!p) return;
+  document.getElementById('fEditProdId').value = p.produto_id;
+  document.getElementById('fEditProdNome').value = p.nome || '';
+  document.getElementById('fEditProdTipo').value = p.tipo || 'combo';
+  document.getElementById('fEditProdPreco').value = p.preco || '';
+  document.getElementById('fEditProdLink').value = p.link_greenn || '';
+  document.getElementById('fEditProdMsg').value = p.mensagem_pos_compra || '';
+  openModal('modalEditProduto');
+}
+
+async function toggleProduto(produtoId, ativo) {
   try {
-    const url = API_URL + '?acao=criar_grupo&nome=' + encodeURIComponent(nome) + '&jid=' + encodeURIComponent(jid) + '&link=' + encodeURIComponent(link);
-    const resp = await fetch(url);
+    const resp = await fetch(`${API_URL}?acao=atualizar_produto&produto_id=${encodeURIComponent(produtoId)}&ativo=${ativo?'SIM':'NAO'}`);
+    const result = await resp.json();
+    if (result.ok) loadData();
+    else alert('Erro: ' + (result.erro||'desconhecido'));
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+async function cadastrarProduto(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnCadastrarProd');
+  const msgEl = document.getElementById('produtoFormMsg');
+  btn.disabled = true; btn.textContent = 'Cadastrando...';
+  try {
+    const params = new URLSearchParams({
+      acao: 'cadastrar_produto',
+      nome: document.getElementById('fProdNome').value.trim(),
+      tipo: document.getElementById('fProdTipo').value,
+      preco: document.getElementById('fProdPreco').value.trim(),
+      link_greenn: document.getElementById('fProdLink').value.trim(),
+      mensagem_pos_compra: document.getElementById('fProdMsg').value.trim()
+    });
+    const resp = await fetch(API_URL + '?' + params.toString());
     const result = await resp.json();
     if (result.ok) {
-      msgEl.className = 'form-msg success';
-      msgEl.textContent = 'Grupo "' + nome + '" cadastrado com sucesso! (#' + (result.grupo_num || '?') + ')';
-      document.getElementById('formGrupo').reset();
-      loadData();
-    } else {
-      msgEl.className = 'form-msg error';
-      msgEl.textContent = 'Erro: ' + (result.erro || 'desconhecido');
-    }
-  } catch (err) {
-    msgEl.className = 'form-msg error';
-    msgEl.textContent = 'Erro de conexao: ' + err.message;
-  }
-  btn.disabled = false;
-  btn.textContent = 'Cadastrar Grupo';
+      msgEl.className = 'form-msg success'; msgEl.textContent = 'Produto cadastrado!';
+      e.target.reset();
+      setTimeout(() => { closeModal('modalProduto'); loadData(); }, 1000);
+    } else { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + (result.erro||'desconhecido'); }
+  } catch (err) { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + err.message; }
+  btn.disabled = false; btn.textContent = 'Cadastrar Produto';
   return false;
 }
 
-// Initial load
-loadData();
+async function editarProduto(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnEditProd');
+  const msgEl = document.getElementById('editProdFormMsg');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const params = new URLSearchParams({
+      acao: 'atualizar_produto',
+      produto_id: document.getElementById('fEditProdId').value,
+      nome: document.getElementById('fEditProdNome').value.trim(),
+      tipo: document.getElementById('fEditProdTipo').value,
+      preco: document.getElementById('fEditProdPreco').value.trim(),
+      link_greenn: document.getElementById('fEditProdLink').value.trim(),
+      mensagem_pos_compra: document.getElementById('fEditProdMsg').value.trim()
+    });
+    const resp = await fetch(API_URL + '?' + params.toString());
+    const result = await resp.json();
+    if (result.ok) {
+      msgEl.className = 'form-msg success'; msgEl.textContent = 'Produto atualizado!';
+      setTimeout(() => { closeModal('modalEditProduto'); loadData(); }, 1000);
+    } else { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + (result.erro||'desconhecido'); }
+  } catch (err) { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + err.message; }
+  btn.disabled = false; btn.textContent = 'Salvar Alteracoes';
+  return false;
+}
 
-// Auto-refresh every 5 min
+// ===================== GRUPOS ACTIONS =====================
+async function cadastrarGrupo(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnCadastrarGrupo');
+  const msgEl = document.getElementById('grupoFormMsg');
+  const nome = document.getElementById('fGrupoNome').value.trim();
+  const linkConvite = document.getElementById('fGrupoLink').value.trim();
+  if (!nome || !linkConvite) { msgEl.className = 'form-msg error'; msgEl.textContent = 'Preencha todos os campos.'; return false; }
+
+  btn.disabled = true; btn.textContent = 'Cadastrando...';
+  try {
+    const params = new URLSearchParams({ acao: 'cadastrar_grupo', nome, link_convite: linkConvite });
+    const resp = await fetch(API_URL + '?' + params.toString());
+    const result = await resp.json();
+    if (result.ok) {
+      msgEl.className = 'form-msg success';
+      msgEl.textContent = `Grupo "${nome}" cadastrado! (#${result.grupo_num||'?'}) — JID: ${result.jid||'pendente'}`;
+      e.target.reset();
+      setTimeout(() => { closeModal('modalGrupo'); loadData(); }, 1500);
+    } else { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + (result.erro||'desconhecido'); }
+  } catch (err) { msgEl.className = 'form-msg error'; msgEl.textContent = 'Erro: ' + err.message; }
+  btn.disabled = false; btn.textContent = 'Cadastrar Grupo';
+  return false;
+}
+
+async function fecharGrupo(jid) {
+  if (!jid) return alert('JID nao encontrado');
+  if (!confirm('Fechar grupo para novos leads?')) return;
+  try {
+    const resp = await fetch(API_URL + '?acao=fechar_grupo&grupo_jid=' + encodeURIComponent(jid));
+    const result = await resp.json();
+    if (result.ok) { alert('Grupo fechado!'); loadData(); }
+    else alert('Erro: ' + (result.erro||'desconhecido'));
+  } catch (e) { alert('Erro: ' + e.message); }
+}
+
+// ===================== INTERACOES TAB =====================
+function renderInteracoes() {
+  const el = document.getElementById('interacoesContent');
+  const grupoNum = document.getElementById('interGrupo').value;
+  const diaFilter = document.getElementById('interDia').value;
+
+  if (!grupoNum) { el.innerHTML = '<div class="empty">Selecione um grupo para ver as interacoes dos leads.</div>'; return; }
+
+  const interacoes = DATA.interacoes || {};
+  const grupoInter = interacoes[grupoNum] || {};
+  const dias = diaFilter ? [diaFilter] : ['Quarta','Quinta'];
+  let hasContent = false;
+  let html = '';
+
+  dias.forEach(dia => {
+    const msgs = grupoInter[dia] || [];
+    if (msgs.length === 0) return;
+    hasContent = true;
+    html += `<div style="margin-bottom:16px;">
+      <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:10px;color:var(--green);">${dia}-feira</h3>`;
+    msgs.forEach(m => {
+      html += `<div style="padding:8px 12px;margin-bottom:6px;background:var(--bg);border-radius:8px;border-left:3px solid var(--border);">
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px;">${m.nome||'Lead'} — ${m.horario||''}</div>
+        <div style="font-size:0.85rem;">${m.texto||''}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  if (!hasContent) html = '<div class="empty">Nenhuma interacao registrada para este grupo.</div>';
+  el.innerHTML = html;
+}
+
+// ===================== INIT =====================
+loadData();
 setInterval(loadData, 5 * 60 * 1000);
 </script>
-
 </body>
 </html>
