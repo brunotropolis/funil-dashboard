@@ -63,7 +63,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 
 /* Buttons */
 .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
-.btn:hover { border-color: var(--green); background: var(--card-hover); }
+.btn:hover { border-color: var(--club-accent, var(--green)); background: var(--card-hover); }
 .btn-green { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
 .btn-green:hover { opacity: 0.9; }
 .btn-danger { border-color: var(--red); color: var(--red); }
@@ -77,15 +77,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sa
 /* Main tabs */
 .main-tabs { display: flex; gap: 2px; margin-bottom: 20px; background: var(--card); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
 .main-tab { flex: 1; padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.15s; text-align: center; border: none; background: transparent; }
-.main-tab.active { background: var(--green); color: #000; }
-.main-tab:hover:not(.active) { color: var(--text); background: var(--bg); }
+.main-tab.active { background: var(--club-tab-active, var(--green)); color: var(--club-tab-text, #000); }
+.main-tab:hover:not(.active) { color: var(--text); background: var(--bg); border-color: var(--club-accent, var(--green)); }
 .main-panel { display: none; }
 .main-panel.active { display: block; }
 
 /* Cards grid */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; transition: border-color 0.15s; }
-.card:hover { border-color: var(--green); }
+.card:hover { border-color: var(--club-accent, var(--green)); }
 .card-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
 .card-value { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
 .card-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
@@ -128,13 +128,13 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
 .filter-bar label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .filter-bar select, .filter-bar input { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.82rem; }
-.filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--green); }
+.filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--club-accent, var(--green)); }
 
 /* Tabs (sub) */
 .tabs { display: flex; gap: 3px; margin-bottom: 14px; flex-wrap: wrap; }
 .tab { padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; background: transparent; border: 1px solid var(--border); color: var(--muted); transition: all 0.15s; }
-.tab.active { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
-.tab:hover:not(.active) { border-color: var(--green); color: var(--text); }
+.tab.active { background: var(--club-tab-active, var(--green)); border-color: var(--club-tab-active, var(--green)); color: var(--club-tab-text, #000); font-weight: 600; }
+.tab:hover:not(.active) { border-color: var(--club-accent, var(--green)); color: var(--text); }
 .tab-count { font-size: 0.68rem; opacity: 0.7; margin-left: 3px; }
 
 /* Modal */
@@ -151,7 +151,7 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 .form-group input, .form-group select, .form-group textarea {
   width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; font-family: inherit;
 }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--green); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--club-accent, var(--green)); }
 .form-group input::placeholder, .form-group textarea::placeholder { color: var(--muted); }
 .form-group textarea { resize: vertical; min-height: 80px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -166,12 +166,12 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 .toggle input { display: none; }
 .toggle-slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); border-radius: 20px; transition: 0.2s; }
 .toggle-slider:before { content: ''; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background: var(--muted); border-radius: 50%; transition: 0.2s; }
-.toggle input:checked + .toggle-slider { background: var(--green); }
+.toggle input:checked + .toggle-slider { background: var(--club-accent, var(--green)); }
 .toggle input:checked + .toggle-slider:before { transform: translateX(16px); background: #000; }
 
 /* Back button */
 .back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.85rem; cursor: pointer; margin-bottom: 16px; background: none; border: none; font-family: inherit; }
-.back-btn:hover { color: var(--green); }
+.back-btn:hover { color: var(--club-accent, var(--green)); }
 
 /* Detail header */
 .grupo-detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -187,7 +187,7 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 
 /* Loading / empty */
 .loading { text-align: center; padding: 30px; color: var(--muted); }
-.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--club-accent, var(--green)); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 0.85rem; }
 
@@ -472,7 +472,7 @@ const CLUBS = {
     api: 'https://n8n-n8n.xktssy.easypanel.host/webhook/dashboard-soninho-api',
     enabled: true,
     accentColor: '#818cf8',
-    redirectDomain: 'clubedosoninho.manualdorecemnascido.com.br'
+    redirectDomain: 'clubedosono.manualdorecemnascido.com.br'
   }
 };
 
@@ -523,12 +523,47 @@ function switchClub(clubId) {
   // Update header name
   document.querySelector('.header-left h1').innerHTML = `<span>${club.icon}</span> ${club.nome}`;
 
+  // Apply club theme colors
+  applyClubTheme(clubId);
+
   // Reset to dashboard tab
   switchTab('dashboard');
 
   // Load data from new API
   loadData();
 }
+
+// ===================== CLUB THEME =====================
+function applyClubTheme(clubId) {
+  const themes = {
+    tete: {
+      bgGradient: 'radial-gradient(ellipse at top left, rgba(244,114,182,0.06) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(244,114,182,0.04) 0%, transparent 50%)',
+      accent: '#f472b6',
+      accentBg: 'rgba(244,114,182,0.12)',
+      tabActive: '#f472b6',
+      tabActiveText: '#000',
+      cardBorderHover: '#f472b6',
+    },
+    soninho: {
+      bgGradient: 'radial-gradient(ellipse at top left, rgba(129,140,248,0.06) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(129,140,248,0.04) 0%, transparent 50%)',
+      accent: '#818cf8',
+      accentBg: 'rgba(129,140,248,0.12)',
+      tabActive: '#818cf8',
+      tabActiveText: '#fff',
+      cardBorderHover: '#818cf8',
+    }
+  };
+  const t = themes[clubId] || themes.tete;
+  const root = document.documentElement;
+  document.body.style.background = `var(--bg)`;
+  document.body.style.backgroundImage = t.bgGradient;
+  root.style.setProperty('--club-accent', t.accent);
+  root.style.setProperty('--club-accent-bg', t.accentBg);
+  root.style.setProperty('--club-tab-active', t.tabActive);
+  root.style.setProperty('--club-tab-text', t.tabActiveText);
+}
+// Apply initial theme
+applyClubTheme('tete');
 
 // ===================== TAB SWITCHING =====================
 function switchTab(name) {
