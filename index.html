@@ -727,28 +727,33 @@ function renderStatusFunil() {
   const met = sf.meteorico;
 
   let html = '';
-  // Captacao card
-  html += `<div class="card" style="border-left: 3px solid var(--green);">
+  // Captacao card — clickable to open WhatsApp group
+  const capClick = cap && cap.invite_link ? `onclick="window.open('${cap.invite_link}','_blank')" style="border-left: 3px solid var(--green); cursor:pointer;"` : `style="border-left: 3px solid var(--green);"`;
+  html += `<div class="card" ${capClick}>
     <div class="card-label" style="color:var(--green);">📢 CAPTACAO DE LEADS</div>`;
   if (cap) {
     html += `<div class="card-value" style="font-size:1rem;">${cap.nome}</div>
       <div class="card-sub" style="margin-top:4px;">
         <code style="font-size:0.7rem;">${(cap.jid||'').substring(0,18)}...</code>
-        ${cap.invite_link ? `<br><a href="${cap.invite_link}" target="_blank" style="color:var(--blue);font-size:0.75rem;">Link convite</a>` : ''}
+        ${cap.invite_link ? `<br><span style="color:var(--blue);font-size:0.75rem;">Clique para abrir no WhatsApp</span>` : ''}
       </div>
-      <button class="btn btn-meteorico btn-sm" style="margin-top:8px;font-size:0.72rem;" onclick="iniciarMeteorico(${cap.grupo_num})">🚀 Iniciar Meteorico</button>`;
+      <button class="btn btn-meteorico btn-sm" style="margin-top:8px;font-size:0.72rem;" onclick="event.stopPropagation();iniciarMeteorico(${cap.grupo_num})">🚀 Iniciar Meteorico</button>`;
   } else {
     html += `<div class="card-value" style="font-size:0.9rem;color:var(--muted);">Nenhum grupo</div>
       <div class="card-sub">Selecione um grupo abaixo</div>`;
   }
   html += '</div>';
 
-  // Meteorico card
-  html += `<div class="card" style="border-left: 3px solid var(--pink);">
+  // Meteorico card — clickable to open WhatsApp group
+  const metLink = met && met.invite_link ? met.invite_link : '';
+  const metClick = metLink ? `onclick="window.open('${metLink}','_blank')" style="border-left: 3px solid var(--pink); cursor:pointer;"` : `style="border-left: 3px solid var(--pink);"`;
+  html += `<div class="card" ${metClick}>
     <div class="card-label" style="color:var(--pink);">🚀 METEORICO ATIVO</div>`;
   if (met) {
     html += `<div class="card-value" style="font-size:1rem;">${met.nome}</div>
-      <div class="card-sub"><code style="font-size:0.7rem;">${(met.jid||'').substring(0,18)}...</code></div>`;
+      <div class="card-sub"><code style="font-size:0.7rem;">${(met.jid||'').substring(0,18)}...</code>
+      ${metLink ? `<br><span style="color:var(--blue);font-size:0.75rem;">Clique para abrir no WhatsApp</span>` : ''}
+      </div>`;
   } else {
     html += `<div class="card-value" style="font-size:0.9rem;color:var(--muted);">Nenhum grupo</div>
       <div class="card-sub">Inicie um meteorico acima</div>`;
