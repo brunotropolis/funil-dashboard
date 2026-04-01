@@ -1095,7 +1095,7 @@ function renderInteracoes() {
 
   if (!grupoNum) { el.innerHTML = '<div class="empty">Selecione um grupo para ver as interacoes dos leads.</div>'; return; }
 
-  const interacoes = DATA.interacoes || {};
+  const interacoes = (DATA.interacoes && DATA.interacoes.por_grupo) || DATA.interacoes || {};
   const grupoInter = interacoes[grupoNum] || {};
   const dias = diaFilter ? [diaFilter] : ['Quarta','Quinta'];
   let hasContent = false;
