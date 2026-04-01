@@ -634,7 +634,7 @@ function renderDashboard() {
   const filtroGrupo = document.getElementById('dashGrupo').value;
   let grupos = DATA.grupos || [];
 
-  let totalLeads = 0, totalLeadsAtivos = 0, totalSaidas = 0, totalVendas = 0, faturamento = 0;
+  let totalLeads = 0, totalSaidas = 0, totalVendas = 0, faturamento = 0;
   let vendasPorProduto = {};
   let conversaoMedia = 0;
 
@@ -643,7 +643,7 @@ function renderDashboard() {
     const fg = grupos.filter(g => String(g.grupo_num) === filtroGrupo);
     fg.forEach(g => {
       totalLeads += g.leads_total || 0;
-      totalLeadsAtivos += g.leads_ativos || g.leads_total || 0;
+
       totalSaidas += g.leads_saidas || 0;
       totalVendas += g.vendas_count || 0;
       faturamento += g.vendas_valor || 0;
@@ -656,7 +656,7 @@ function renderDashboard() {
     });
   } else {
     totalLeads = d.total_leads || 0;
-    totalLeadsAtivos = d.total_leads_ativos || d.total_leads || 0;
+
     totalSaidas = d.total_saidas || 0;
     totalVendas = d.total_vendas || 0;
     faturamento = d.faturamento_total || 0;
@@ -672,7 +672,7 @@ function renderDashboard() {
     <div class="card"><div class="card-label">Total de Vendas</div><div class="card-value green">${fmt(totalVendas)}</div></div>
     <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtMoney(ticketMedio)}</div></div>
     <div class="card"><div class="card-label">Conversao Media</div><div class="card-value pink">${fmtPct(conversaoMedia)}</div></div>
-    <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div><div class="card-sub">${fmt(totalLeadsAtivos)} ativos agora</div></div>
+    <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div></div>
     <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(totalSaidas)}</div><div class="card-sub">${totalLeads > 0 ? fmtPct(totalSaidas/totalLeads*100) : '0%'} do total</div></div>
   `;
 
@@ -706,11 +706,11 @@ function renderDashboard() {
   // Meteoricos table
   const mel = document.getElementById('dashMeteoricosList');
   if (grupos.length === 0) { mel.innerHTML = '<div class="empty">Nenhum meteorico registrado.</div>'; return; }
-  let html = `<table><thead><tr><th>#</th><th>Nome</th><th>Status</th><th>Entraram</th><th>Ativos</th><th>Saidas</th><th>Dia Oferta</th><th>Vendas</th><th>Faturamento</th><th>Conversao</th></tr></thead><tbody>`;
+  let html = `<table><thead><tr><th>#</th><th>Nome</th><th>Status</th><th>Entraram</th><th>Saidas</th><th>Dia Oferta</th><th>Vendas</th><th>Faturamento</th><th>Conversao</th></tr></thead><tbody>`;
   grupos.forEach(g => {
     html += `<tr class="clickable" onclick="switchTab('grupos');setTimeout(()=>openGrupoDetail(${g.grupo_num}),50)">
       <td>${g.grupo_num}</td><td style="font-weight:600;">${g.nome||'-'}</td><td>${statusBadge(g.status)}</td>
-      <td>${fmt(g.leads_total)}</td><td>${fmt(g.leads_ativos||g.leads_total)}</td><td>${fmt(g.leads_saidas)}</td><td>${fmt(g.leads_dia_oferta)}</td>
+      <td>${fmt(g.leads_total)}</td><td>${fmt(g.leads_saidas)}</td><td>${fmt(g.leads_dia_oferta)}</td>
       <td>${fmt(g.vendas_count)}</td><td>${g.vendas_valor>0?fmtMoney(g.vendas_valor):'-'}</td><td>${g.conversao_pct>0?fmtPct(g.conversao_pct):'-'}</td>
     </tr>`;
   });
@@ -827,10 +827,9 @@ function renderGrupoDetail() {
   </div>`;
 
   // Metrics
-  const leadsAtivos = g.leads_ativos || g.leads_total;
   html += `<div class="cards">
     <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(g.leads_total)}</div><div class="card-sub">Total que entrou</div></div>
-    <div class="card"><div class="card-label">Leads Ativos</div><div class="card-value blue">${fmt(leadsAtivos)}</div><div class="card-sub">Atualmente no grupo</div></div>
+
     <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(g.leads_saidas)}</div><div class="card-sub">Excl. remocoes por compra</div></div>
     <div class="card"><div class="card-label">Leads Dia da Oferta</div><div class="card-value">${fmt(g.leads_dia_oferta)}</div><div class="card-sub">Snapshot quinta 9h</div></div>
     <div class="card"><div class="card-label">Conversao</div><div class="card-value pink">${fmtPct(g.conversao_pct)}</div><div class="card-sub">${fmt(g.vendas_count)} vendas / ${fmt(g.leads_dia_oferta)} leads</div></div>
