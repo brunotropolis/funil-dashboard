@@ -202,6 +202,21 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 /* Error detail */
 .erro-detail { max-width: 200px; font-size: 0.72rem; color: var(--red); word-break: break-word; }
 
+/* Fluxo chart */
+.fluxo-chart { display: flex; align-items: flex-end; gap: 6px; padding: 10px 0; min-height: 120px; overflow-x: auto; }
+.fluxo-col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 40px; }
+.fluxo-bars { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 100%; }
+.fluxo-bar { width: 24px; border-radius: 3px; min-height: 2px; transition: height 0.3s; }
+.fluxo-bar.entrada { background: var(--green); }
+.fluxo-bar.saida { background: var(--red); }
+.fluxo-label { font-size: 0.62rem; color: var(--muted); white-space: nowrap; margin-top: 4px; }
+.fluxo-count { font-size: 0.62rem; font-weight: 600; }
+.fluxo-count.green { color: var(--green); }
+.fluxo-count.red { color: var(--red); }
+.fluxo-legend { display: flex; gap: 16px; margin-bottom: 8px; font-size: 0.75rem; color: var(--muted); }
+.fluxo-legend span { display: flex; align-items: center; gap: 4px; }
+.fluxo-legend .dot { width: 10px; height: 10px; border-radius: 2px; }
+
 /* Responsive */
 @media (max-width: 600px) {
   .container { padding: 12px; }
@@ -836,6 +851,29 @@ function renderGrupoDetail() {
     <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value green">${fmtMoney(g.ticket_medio)}</div></div>
     <div class="card"><div class="card-label">Faturamento</div><div class="card-value green">${fmtMoney(g.vendas_valor)}</div></div>
   </div>`;
+
+  // Fluxo diario chart
+  const fluxo = g.fluxo_diario || [];
+  if (fluxo.length > 0) {
+    const maxVal = Math.max(...fluxo.map(f => Math.max(f.entradas, f.saidas)), 1);
+    const maxBarH = 80;
+    html += `<div class="section"><div class="section-header"><div class="section-title">📈 Fluxo Diario de Leads</div></div>`;
+    html += `<div class="fluxo-legend"><span><span class="dot" style="background:var(--green);"></span> Entradas</span><span><span class="dot" style="background:var(--red);"></span> Saidas</span></div>`;
+    html += '<div class="fluxo-chart">';
+    fluxo.forEach(f => {
+      const eH = Math.max(2, Math.round((f.entradas / maxVal) * maxBarH));
+      const sH = Math.max(f.saidas > 0 ? 2 : 0, Math.round((f.saidas / maxVal) * maxBarH));
+      const dParts = f.data.split('-');
+      const label = dParts[2] + '/' + dParts[1];
+      html += `<div class="fluxo-col">
+        <span class="fluxo-count green">+${f.entradas}</span>
+        <div class="fluxo-bar entrada" style="height:${eH}px;" title="Entradas: ${f.entradas}"></div>
+        ${sH > 0 ? `<div class="fluxo-bar saida" style="height:${sH}px;" title="Saidas: ${f.saidas}"></div><span class="fluxo-count red">-${f.saidas}</span>` : ''}
+        <span class="fluxo-label">${label}</span>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
 
   // Vendas por produto + Compradores
   html += '<div class="grid-2">';
