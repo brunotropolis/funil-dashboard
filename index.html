@@ -27,23 +27,23 @@
   --accent-bg: rgba(45,212,160,0.12);
 }
 
-/* Club selector */
-.club-selector { display: flex; gap: 8px; margin-bottom: 16px; }
-.club-tab {
-  flex: 1; padding: 14px 20px; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
-  cursor: pointer; text-align: center; border: 2px solid var(--border); background: var(--card);
-  color: var(--muted); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+/* Club dropdown */
+.club-dropdown {
+  position: relative; display: inline-block;
 }
-.club-tab .club-icon { font-size: 1.3rem; }
-.club-tab .club-name { letter-spacing: -0.01em; }
-.club-tab .club-badge { font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; background: rgba(107,107,128,0.15); text-transform: uppercase; letter-spacing: 0.04em; }
-.club-tab.active-tete { border-color: #f472b6; background: rgba(244,114,182,0.08); color: var(--text); }
-.club-tab.active-tete .club-badge { background: rgba(244,114,182,0.2); color: #f472b6; }
-.club-tab.active-soninho { border-color: #818cf8; background: rgba(129,140,248,0.08); color: var(--text); }
-.club-tab.active-soninho .club-badge { background: rgba(129,140,248,0.2); color: #818cf8; }
-.club-tab:hover:not([class*="active-"]) { border-color: var(--muted); color: var(--text); }
-.club-tab.disabled { opacity: 0.4; cursor: not-allowed; }
-.club-tab.disabled:hover { border-color: var(--border); color: var(--muted); }
+.club-dropdown select {
+  appearance: none; -webkit-appearance: none;
+  background: var(--card); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 32px 6px 12px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; outline: none; transition: border-color 0.15s;
+  font-family: inherit;
+}
+.club-dropdown select:hover { border-color: var(--club-accent, var(--green)); }
+.club-dropdown select:focus { border-color: var(--club-accent, var(--green)); }
+.club-dropdown::after {
+  content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  border: 4px solid transparent; border-top-color: var(--muted); pointer-events: none;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
@@ -216,23 +216,17 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <h1><span>🤱</span> Clube do Tete</h1>
+      <h1><span>😴</span> Clube do Soninho</h1>
     </div>
     <div class="header-right">
+      <div class="club-dropdown">
+        <select id="clubSelect" onchange="switchClub(this.value)">
+          <option value="soninho">😴 Clube do Soninho</option>
+          <option value="tete">🤱 Clube do Tete</option>
+        </select>
+      </div>
       <span class="updated-at" id="updatedAt"></span>
       <button class="btn btn-sm" onclick="loadData()">Atualizar</button>
-    </div>
-  </div>
-
-  <!-- Club selector -->
-  <div class="club-selector">
-    <div class="club-tab active-tete" id="clubTabTete" onclick="switchClub('tete')">
-      <span class="club-icon">🤱</span>
-      <span class="club-name">Clube do Tete</span>
-    </div>
-    <div class="club-tab" id="clubTabSoninho" onclick="switchClub('soninho')">
-      <span class="club-icon">😴</span>
-      <span class="club-name">Clube do Soninho</span>
     </div>
   </div>
 
@@ -477,8 +471,8 @@ const CLUBS = {
   }
 };
 
-let currentClub = 'tete';
-let API_URL = CLUBS.tete.api;
+let currentClub = 'soninho';
+let API_URL = CLUBS.soninho.api;
 let DATA = null;
 let selectedGrupo = null;
 
@@ -514,12 +508,9 @@ function switchClub(clubId) {
   DATA = null;
   selectedGrupo = null;
 
-  // Update club tabs visual
-  document.querySelectorAll('.club-tab').forEach(t => {
-    t.className = 'club-tab';
-  });
-  const activeTab = document.getElementById('clubTab' + clubId.charAt(0).toUpperCase() + clubId.slice(1));
-  if (activeTab) activeTab.classList.add('active-' + clubId);
+  // Update dropdown selection
+  const sel = document.getElementById('clubSelect');
+  if (sel && sel.value !== clubId) sel.value = clubId;
 
   // Update header name
   document.querySelector('.header-left h1').innerHTML = `<span>${club.icon}</span> ${club.nome}`;
@@ -564,7 +555,7 @@ function applyClubTheme(clubId) {
   root.style.setProperty('--club-tab-text', t.tabActiveText);
 }
 // Apply initial theme
-applyClubTheme('tete');
+applyClubTheme('soninho');
 
 // ===================== TAB SWITCHING =====================
 function switchTab(name) {
