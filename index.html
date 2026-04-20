@@ -854,6 +854,66 @@ function renderGrupoDetail() {
   }
   html += '</div></div>';
 
+  // Histórico de Entradas e Saídas
+  const historico = g.historico || [];
+  const fluxo = g.fluxo_diario || [];
+  html += `<div class="section">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">📈</span> Histórico de Entradas e Saídas</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="histSearch" placeholder="Buscar telefone…" oninput="filterHistorico()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text);font-size:0.78rem;width:160px;">
+        <select id="histTipo" onchange="filterHistorico()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:0.78rem;">
+          <option value="">Todos</option>
+          <option value="ENTRADA">Entradas</option>
+          <option value="SAIDA">Saídas</option>
+        </select>
+      </div>
+    </div>`;
+
+  // Resumo diário (fluxo)
+  if (fluxo.length > 0) {
+    html += `<div style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px;">`;
+    [...fluxo].reverse().slice(0, 14).forEach(f => {
+      const dt = f.data.substring(5); // MM-DD
+      const [mm, dd] = dt.split('-');
+      const label = `${dd}/${mm}`;
+      html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;text-align:center;min-width:64px;">
+        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:2px;">${label}</div>
+        ${f.entradas > 0 ? `<div style="font-size:0.75rem;color:var(--green);font-weight:600;">+${f.entradas}</div>` : ''}
+        ${f.saidas > 0 ? `<div style="font-size:0.75rem;color:var(--red);">-${f.saidas}</div>` : ''}
+        ${f.entradas === 0 && f.saidas === 0 ? `<div style="font-size:0.75rem;color:var(--muted);">—</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (historico.length === 0) {
+    html += '<div class="empty">Nenhum registro.</div>';
+  } else {
+    html += `<div class="table-scroll"><table id="historicoTable">
+      <thead><tr><th>Tipo</th><th>Telefone</th><th>Nome</th><th>Data/Hora</th><th>Motivo</th></tr></thead>
+      <tbody>`;
+    historico.forEach(h => {
+      const isEntrada = h.tipo === 'ENTRADA';
+      const cor = isEntrada ? 'var(--green)' : 'var(--red)';
+      const icon = isEntrada ? '↑' : '↓';
+      const tel = h.telefone || '';
+      const telFmt = tel.length >= 12 ? `+${tel.slice(0,2)} ${tel.slice(2,4)} ${tel.slice(4,9)}-${tel.slice(9)}` : tel;
+      const dt = h.data ? new Date(h.data) : null;
+      const dtFmt = dt ? dt.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+      html += `<tr data-tipo="${h.tipo}" data-tel="${tel}">
+        <td><span style="font-weight:700;color:${cor};">${icon} ${h.tipo}</span></td>
+        <td style="font-size:0.78rem;font-family:monospace;">${telFmt}</td>
+        <td>${h.nome || '-'}</td>
+        <td style="font-size:0.75rem;color:var(--muted);">${dtFmt}</td>
+        <td style="font-size:0.75rem;color:var(--muted);">${h.motivo || '-'}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>
+    <div id="histCount" style="font-size:0.72rem;color:var(--muted);margin-top:8px;">${historico.length} registros</div>`;
+  }
+  html += `</div>`;
+
   // Disparos
   html += `<div class="section"><div class="section-header"><div class="section-title">📨 Disparos</div></div>`;
   const disparos = g.disparos || {};
@@ -889,6 +949,24 @@ function renderGrupoDetail() {
   html += '</div>';
 
   el.innerHTML = html;
+}
+
+function filterHistorico() {
+  const search = (document.getElementById('histSearch')?.value || '').toLowerCase();
+  const tipo = document.getElementById('histTipo')?.value || '';
+  const rows = document.querySelectorAll('#historicoTable tbody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const rowTipo = row.dataset.tipo || '';
+    const rowTel = row.dataset.tel || '';
+    const matchTipo = !tipo || rowTipo === tipo;
+    const matchSearch = !search || rowTel.includes(search);
+    const show = matchTipo && matchSearch;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const countEl = document.getElementById('histCount');
+  if (countEl) countEl.textContent = `${visible} registros`;
 }
 
 function selectDisparoDay(dia, tabEl) {
