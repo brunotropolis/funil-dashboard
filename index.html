@@ -854,63 +854,29 @@ function renderGrupoDetail() {
   }
   html += '</div></div>';
 
-  // Histórico de Entradas e Saídas
-  const historico = g.historico || [];
-  const fluxo = g.fluxo_diario || [];
+  // --- Tabela diária (mais antiga → mais recente) ---
+  const fluxo = [...(g.fluxo_diario || [])].sort((a, b) => a.data.localeCompare(b.data));
   html += `<div class="section">
-    <div class="section-header">
-      <div class="section-title"><span class="icon">📈</span> Histórico de Entradas e Saídas</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="histSearch" placeholder="Buscar telefone…" oninput="filterHistorico()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text);font-size:0.78rem;width:160px;">
-        <select id="histTipo" onchange="filterHistorico()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:0.78rem;">
-          <option value="">Todos</option>
-          <option value="ENTRADA">Entradas</option>
-          <option value="SAIDA">Saídas</option>
-        </select>
-      </div>
-    </div>`;
-
-  // Resumo diário (fluxo)
-  if (fluxo.length > 0) {
-    html += `<div style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px;">`;
-    [...fluxo].reverse().slice(0, 14).forEach(f => {
-      const dt = f.data.substring(5); // MM-DD
-      const [mm, dd] = dt.split('-');
-      const label = `${dd}/${mm}`;
-      html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;text-align:center;min-width:64px;">
-        <div style="font-size:0.65rem;color:var(--muted);margin-bottom:2px;">${label}</div>
-        ${f.entradas > 0 ? `<div style="font-size:0.75rem;color:var(--green);font-weight:600;">+${f.entradas}</div>` : ''}
-        ${f.saidas > 0 ? `<div style="font-size:0.75rem;color:var(--red);">-${f.saidas}</div>` : ''}
-        ${f.entradas === 0 && f.saidas === 0 ? `<div style="font-size:0.75rem;color:var(--muted);">—</div>` : ''}
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  if (historico.length === 0) {
-    html += '<div class="empty">Nenhum registro.</div>';
+    <div class="section-header"><div class="section-title"><span class="icon">📅</span> Entradas e Saídas por Dia</div></div>`;
+  if (fluxo.length === 0) {
+    html += '<div class="empty">Sem dados de fluxo.</div>';
   } else {
-    html += `<div class="table-scroll"><table id="historicoTable">
-      <thead><tr><th>Tipo</th><th>Telefone</th><th>Nome</th><th>Data/Hora</th><th>Motivo</th></tr></thead>
-      <tbody>`;
-    historico.forEach(h => {
-      const isEntrada = h.tipo === 'ENTRADA';
-      const cor = isEntrada ? 'var(--green)' : 'var(--red)';
-      const icon = isEntrada ? '↑' : '↓';
-      const tel = h.telefone || '';
-      const telFmt = tel.length >= 12 ? `+${tel.slice(0,2)} ${tel.slice(2,4)} ${tel.slice(4,9)}-${tel.slice(9)}` : tel;
-      const dt = h.data ? new Date(h.data) : null;
-      const dtFmt = dt ? dt.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
-      html += `<tr data-tipo="${h.tipo}" data-tel="${tel}">
-        <td><span style="font-weight:700;color:${cor};">${icon} ${h.tipo}</span></td>
-        <td style="font-size:0.78rem;font-family:monospace;">${telFmt}</td>
-        <td>${h.nome || '-'}</td>
-        <td style="font-size:0.75rem;color:var(--muted);">${dtFmt}</td>
-        <td style="font-size:0.75rem;color:var(--muted);">${h.motivo || '-'}</td>
+    html += `<div class="table-scroll"><table>
+      <thead><tr><th>Data</th><th style="color:var(--green);">Entradas</th><th style="color:var(--red);">Saídas</th><th>Saldo</th></tr></thead><tbody>`;
+    let acumulado = 0;
+    fluxo.forEach(f => {
+      const [yyyy, mm, dd] = f.data.split('-');
+      const label = `${dd}/${mm}/${yyyy}`;
+      const saldo = (f.entradas || 0) - (f.saidas || 0);
+      acumulado += saldo;
+      html += `<tr>
+        <td style="font-size:0.82rem;">${label}</td>
+        <td style="color:var(--green);font-weight:600;">${f.entradas > 0 ? '+'+f.entradas : '—'}</td>
+        <td style="color:var(--red);">${f.saidas > 0 ? '-'+f.saidas : '—'}</td>
+        <td style="font-size:0.78rem;color:var(--muted);">${saldo > 0 ? '+' : ''}${saldo} <span style="font-size:0.7rem;">(total: ${acumulado})</span></td>
       </tr>`;
     });
-    html += `</tbody></table></div>
-    <div id="histCount" style="font-size:0.72rem;color:var(--muted);margin-top:8px;">${historico.length} registros</div>`;
+    html += `</tbody></table></div>`;
   }
   html += `</div>`;
 
@@ -948,25 +914,88 @@ function renderGrupoDetail() {
   });
   html += '</div>';
 
+  // --- Lista individual com paginação ---
+  const historico = g.historico || [];
+  html += `<div class="section">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">👥</span> Histórico Individual</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="histTipo" onchange="histPage=1;renderHistPage()" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:0.78rem;">
+          <option value="">Todos</option>
+          <option value="ENTRADA">Entradas</option>
+          <option value="SAIDA">Saídas</option>
+        </select>
+      </div>
+    </div>
+    <div id="histTableWrap"></div>
+    <div id="histPagination" style="display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:10px;font-size:0.78rem;"></div>
+  </div>`;
+
+  // Guardar historico no estado global para paginação
+  window._histData = historico;
+  window.histPage = 1;
+
   el.innerHTML = html;
+
+  // Renderizar primeira página
+  renderHistPage();
 }
 
-function filterHistorico() {
-  const search = (document.getElementById('histSearch')?.value || '').toLowerCase();
+function renderHistPage() {
   const tipo = document.getElementById('histTipo')?.value || '';
-  const rows = document.querySelectorAll('#historicoTable tbody tr');
-  let visible = 0;
-  rows.forEach(row => {
-    const rowTipo = row.dataset.tipo || '';
-    const rowTel = row.dataset.tel || '';
-    const matchTipo = !tipo || rowTipo === tipo;
-    const matchSearch = !search || rowTel.includes(search);
-    const show = matchTipo && matchSearch;
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
+  const data = (window._histData || []).filter(h => !tipo || h.tipo === tipo);
+  const PER_PAGE = 20;
+  const totalPages = Math.max(1, Math.ceil(data.length / PER_PAGE));
+  window.histPage = Math.min(window.histPage, totalPages);
+  const page = window.histPage;
+  const slice = data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  const wrap = document.getElementById('histTableWrap');
+  if (!wrap) return;
+
+  if (data.length === 0) {
+    wrap.innerHTML = '<div class="empty">Nenhum registro.</div>';
+    document.getElementById('histPagination').innerHTML = '';
+    return;
+  }
+
+  let rows = '';
+  slice.forEach(h => {
+    const isEntrada = h.tipo === 'ENTRADA';
+    const cor = isEntrada ? 'var(--green)' : 'var(--red)';
+    const icon = isEntrada ? '↑' : '↓';
+    const tel = h.telefone || '';
+    const telFmt = tel.length >= 12 ? `+${tel.slice(0,2)} ${tel.slice(2,4)} ${tel.slice(4,9)}-${tel.slice(9)}` : tel;
+    const dt = h.data ? new Date(h.data) : null;
+    const dtFmt = dt ? dt.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+    rows += `<tr>
+      <td><span style="font-weight:700;color:${cor};">${icon} ${h.tipo}</span></td>
+      <td style="font-size:0.78rem;font-family:monospace;">${telFmt}</td>
+      <td>${h.nome || 'Lead'}</td>
+      <td style="font-size:0.75rem;color:var(--muted);">${dtFmt}</td>
+      <td style="font-size:0.75rem;color:var(--muted);">${h.motivo || '-'}</td>
+    </tr>`;
   });
-  const countEl = document.getElementById('histCount');
-  if (countEl) countEl.textContent = `${visible} registros`;
+  wrap.innerHTML = `<div class="table-scroll"><table>
+    <thead><tr><th>Tipo</th><th>Telefone</th><th>Nome</th><th>Data/Hora</th><th>Motivo</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>
+  <div style="font-size:0.72rem;color:var(--muted);margin-top:6px;">${data.length} registros — pág. ${page} de ${totalPages}</div>`;
+
+  // Paginação
+  const pg = document.getElementById('histPagination');
+  if (!pg) return;
+  let pgHtml = '';
+  const btnStyle = (active) => `style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:${active?'var(--club-accent,var(--green))':'var(--bg)'};color:${active?'#000':'var(--text)'};cursor:pointer;font-size:0.78rem;"`;
+  if (page > 1) pgHtml += `<button ${btnStyle(false)} onclick="histPage--;renderHistPage()">‹ Anterior</button>`;
+  // Botões de página (máx 7 visíveis)
+  const start = Math.max(1, page - 3);
+  const end = Math.min(totalPages, start + 6);
+  for (let p = start; p <= end; p++) {
+    pgHtml += `<button ${btnStyle(p===page)} onclick="histPage=${p};renderHistPage()">${p}</button>`;
+  }
+  if (page < totalPages) pgHtml += `<button ${btnStyle(false)} onclick="histPage++;renderHistPage()">Próxima ›</button>`;
+  pg.innerHTML = pgHtml;
 }
 
 function selectDisparoDay(dia, tabEl) {
