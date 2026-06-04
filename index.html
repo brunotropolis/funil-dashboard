@@ -478,7 +478,7 @@ let selectedGrupo = null;
 
 // Webhook secret (proteção contra scans automatizados)
 // Override local: localStorage.setItem('funil-webhook-secret', '...')
-const WEBHOOK_SECRET = localStorage.getItem('funil-webhook-secret') || '06Md1TX1ufLkrTwFXdq3DAtCDvtnpcwdJxFRDqj-Wx0';
+const WEBHOOK_SECRET = localStorage.getItem('funil-webhook-secret') || '06Md1TX1ifVnBev22UxZ-7qE88TMa9b-yozNECMZtp4';
 function apiFetch(url, opts) {
   opts = opts || {};
   opts.headers = Object.assign({ 'X-Webhook-Secret': WEBHOOK_SECRET }, opts.headers || {});
