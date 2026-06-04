@@ -476,6 +476,15 @@ let API_URL = CLUBS.soninho.api;
 let DATA = null;
 let selectedGrupo = null;
 
+// Webhook secret (proteção contra scans automatizados)
+// Override local: localStorage.setItem('funil-webhook-secret', '...')
+const WEBHOOK_SECRET = localStorage.getItem('funil-webhook-secret') || '06Md1TX1ufLkrTwFXdq3DAtCDvtnpcwdJxFRDqj-Wx0';
+function apiFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({ 'X-Webhook-Secret': WEBHOOK_SECRET }, opts.headers || {});
+  return fetch(url, opts);
+}
+
 // ===================== UTILS =====================
 function fmt(n) { return new Intl.NumberFormat('pt-BR').format(n || 0); }
 function fmtMoney(n) { return 'R$ ' + new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0); }
@@ -583,7 +592,7 @@ document.querySelectorAll('.modal-overlay').forEach(el => {
 async function loadData() {
   try {
     document.getElementById('updatedAt').textContent = 'Carregando...';
-    const resp = await fetch(API_URL);
+    const resp = await apiFetch(API_URL);
     DATA = await resp.json();
     renderAll();
     document.getElementById('updatedAt').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
@@ -1075,7 +1084,7 @@ async function cadastrarProduto(e) {
       link_greenn: document.getElementById('fProdLink').value.trim(),
       mensagem_pos_compra: document.getElementById('fProdMsg').value.trim()
     });
-    const resp = await fetch(API_URL + '?' + params.toString());
+    const resp = await apiFetch(API_URL + '?' + params.toString());
     const result = await resp.json();
     if (result.ok) {
       msgEl.className = 'form-msg success'; msgEl.textContent = 'Produto cadastrado!';
@@ -1102,7 +1111,7 @@ async function editarProduto(e) {
       link_greenn: document.getElementById('fEditProdLink').value.trim(),
       mensagem_pos_compra: document.getElementById('fEditProdMsg').value.trim()
     });
-    const resp = await fetch(API_URL + '?' + params.toString());
+    const resp = await apiFetch(API_URL + '?' + params.toString());
     const result = await resp.json();
     if (result.ok) {
       msgEl.className = 'form-msg success'; msgEl.textContent = 'Produto atualizado!';
@@ -1125,7 +1134,7 @@ async function cadastrarGrupo(e) {
   btn.disabled = true; btn.textContent = 'Cadastrando...';
   try {
     const params = new URLSearchParams({ acao: 'cadastrar_grupo', nome, link_convite: linkConvite });
-    const resp = await fetch(API_URL + '?' + params.toString());
+    const resp = await apiFetch(API_URL + '?' + params.toString());
     const result = await resp.json();
     if (result.ok) {
       msgEl.className = 'form-msg success';
@@ -1143,7 +1152,7 @@ async function fecharGrupo(jid) {
   if (!jid) return alert('JID nao encontrado');
   if (!confirm('Fechar grupo para novos leads?')) return;
   try {
-    const resp = await fetch(API_URL + '?acao=fechar_grupo&grupo_jid=' + encodeURIComponent(jid));
+    const resp = await apiFetch(API_URL + '?acao=fechar_grupo&grupo_jid=' + encodeURIComponent(jid));
     const result = await resp.json();
     if (result.ok) { alert('Grupo fechado!'); loadData(); }
     else alert('Erro: ' + (result.erro||'desconhecido'));
@@ -1153,13 +1162,13 @@ async function fecharGrupo(jid) {
 async function definirCaptacao(grupoNum) {
   if (!confirm(`Definir grupo #${grupoNum} como CAPTACAO DE LEADS?\nO grupo sera aberto para novos membros e o link de redirecionamento sera atualizado.`)) return;
   try {
-    const resp = await fetch(API_URL + '?acao=definir_captacao&grupo_num=' + grupoNum);
+    const resp = await apiFetch(API_URL + '?acao=definir_captacao&grupo_num=' + grupoNum);
     const result = await resp.json();
     if (result.ok) {
       // Update redirect page to point to this captacao group
       if (result.invite_link) {
         try {
-          await fetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.invite_link));
+          await apiFetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.invite_link));
         } catch (e) { /* non-critical */ }
       }
       alert(`Grupo "${result.grupo_nome}" definido como CAPTACAO!\nLink de redirecionamento atualizado.`);
@@ -1171,13 +1180,13 @@ async function definirCaptacao(grupoNum) {
 async function iniciarMeteorico(grupoNum) {
   if (!confirm(`INICIAR METEORICO no grupo #${grupoNum}?\n\nIsso vai:\n• Fechar o grupo para novos leads\n• Marcar como ATIVO para disparos\n• Atualizar o link de redirecionamento`)) return;
   try {
-    const resp = await fetch(API_URL + '?acao=iniciar_meteorico&grupo_num=' + grupoNum);
+    const resp = await apiFetch(API_URL + '?acao=iniciar_meteorico&grupo_num=' + grupoNum);
     const result = await resp.json();
     if (result.ok) {
       // Update redirect page if there's a captacao group
       if (result.redirect_invite) {
         try {
-          await fetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.redirect_invite));
+          await apiFetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.redirect_invite));
         } catch (e) { /* non-critical */ }
       }
       alert(`Meteorico iniciado no grupo "${result.grupo_nome}"!\nGrupo fechado para novos leads.`);
