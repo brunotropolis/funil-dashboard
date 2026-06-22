@@ -286,7 +286,10 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 
       <div class="section-header" style="margin-bottom: 16px;">
         <div class="section-title"><span class="icon">📱</span> Grupos Cadastrados</div>
-        <button class="btn btn-green btn-sm" onclick="openModal('modalGrupo')">+ Novo Grupo</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-meteorico btn-sm" id="btnCriarGrupos" onclick="criarGrupos()">🌪️ CRIAR GRUPOS</button>
+          <button class="btn btn-green btn-sm" onclick="openModal('modalGrupo')">+ Novo Grupo</button>
+        </div>
       </div>
       <div class="filter-bar">
         <label>STATUS:</label>
@@ -1193,6 +1196,25 @@ async function iniciarMeteorico(grupoNum) {
       loadData();
     } else alert('Erro: ' + (result.erro||'desconhecido'));
   } catch (e) { alert('Erro: ' + e.message); }
+}
+
+async function criarGrupos() {
+  if (!confirm('CRIAR 2 GRUPOS novos no buffer?\n\nVai criar 2 grupos de WhatsApp vazios (CLUBE DO SONINHO #N e #N+1), ja com os admins promovidos e em modo so-admin, na fila (AGUARDANDO).\nQuando voce finalizar um meteorico, o sistema promove o primeiro da fila automaticamente.')) return;
+  const btn = document.getElementById('btnCriarGrupos');
+  const orig = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Criando 2 grupos...'; }
+  try {
+    const resp = await apiFetch(API_URL + '?acao=criar_grupos&qtd=2');
+    const r = await resp.json();
+    if (r.ok) {
+      const nomes = (r.criados || []).map(g => g.nome).join(', ');
+      let msg = `${r.qtd} grupo(s) criado(s) na fila (AGUARDANDO):\n${nomes}`;
+      if (r.warnings && r.warnings.length) msg += '\n\nAvisos: ' + r.warnings.join('; ');
+      alert(msg);
+      loadData();
+    } else alert('Erro: ' + (r.erro || 'desconhecido') + (r.warnings && r.warnings.length ? '\n' + r.warnings.join('; ') : ''));
+  } catch (e) { alert('Erro: ' + e.message); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = orig; } }
 }
 
 // ===================== INTERACOES TAB =====================
