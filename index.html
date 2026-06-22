@@ -1192,7 +1192,10 @@ async function iniciarMeteorico(grupoNum) {
           await apiFetch(API_URL + '?acao=atualizar_redirect&invite_link=' + encodeURIComponent(result.redirect_invite));
         } catch (e) { /* non-critical */ }
       }
-      alert(`Meteorico iniciado no grupo "${result.grupo_nome}"!\nGrupo fechado para novos leads.`);
+      // re-purga o cache do redirect depois do GitHub Pages reconstruir (evita link velho em cache do Cloudflare)
+      setTimeout(() => { apiFetch(API_URL + '?acao=purgar_redirect').catch(() => {}); }, 45000);
+      setTimeout(() => { apiFetch(API_URL + '?acao=purgar_redirect').catch(() => {}); }, 90000);
+      alert(`Meteorico iniciado no grupo "${result.grupo_nome}"!\nGrupo fechado para novos leads.\n(o link do redirect atualiza em ~1-2 min)`);
       loadData();
     } else alert('Erro: ' + (result.erro||'desconhecido'));
   } catch (e) { alert('Erro: ' + e.message); }
