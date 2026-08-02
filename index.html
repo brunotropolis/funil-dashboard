@@ -6,25 +6,35 @@
 <title>Painel Meteorico</title>
 <style>
 :root {
-  --bg: #0a0a0f;
-  --bg2: #111118;
-  --card: #16161e;
-  --card-hover: #1c1c26;
-  --border: #2a2a3a;
-  --text: #e8e8ef;
-  --muted: #6b6b80;
-  --green: #2dd4a0;
-  --green-bg: rgba(45,212,160,0.12);
-  --red: #ef4444;
-  --red-bg: rgba(239,68,68,0.12);
-  --yellow: #eab308;
-  --yellow-bg: rgba(234,179,8,0.12);
-  --blue: #3b82f6;
-  --blue-bg: rgba(59,130,246,0.12);
-  --pink: #ec4899;
-  --pink-bg: rgba(236,72,153,0.12);
-  --accent: #2dd4a0;
-  --accent-bg: rgba(45,212,160,0.12);
+  /* Paleta do CRM (Manual do Recem-Nascido): fundo claro esverdeado,
+     cards brancos, lateral verde-escuro, acento dourado. */
+  --bg: #E8F1F0;
+  --bg2: #DCE8E6;
+  --card: #FFFFFF;
+  --card-hover: #F4F9F8;
+  --border: #DCE8E6;
+  --text: #23332F;
+  --muted: #6E827D;
+  --dim: #93A5A1;
+  --green: #17A2A0;            /* teal = dinheiro/sucesso */
+  --green-bg: rgba(23,162,160,0.12);
+  --red: #D64545;
+  --red-bg: rgba(214,69,69,0.10);
+  --yellow: #B98209;
+  --yellow-bg: rgba(227,163,27,0.14);
+  --blue: #17A2A0;            /* captando -> teal */
+  --blue-bg: rgba(23,162,160,0.12);
+  --pink: #E3A31B;
+  --pink-bg: rgba(227,163,27,0.12);
+  --accent: #E3A31B;          /* dourado = acao primaria */
+  --accent2: #C88C10;
+  --accent-bg: rgba(227,163,27,0.12);
+  --club-accent: #E3A31B;
+  --menu: #3A5049;
+  --menu2: #31453F;
+  --menuTxt: #E7EEEC;
+  --menuMute: #9DB3AD;
+  --soft-shadow: 0 1px 2px rgba(35,51,47,.06), 0 4px 16px -6px rgba(35,51,47,.12);
 }
 
 /* Club dropdown */
@@ -206,37 +216,129 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 /* Responsive */
 @media (max-width: 600px) {
   .container { padding: 12px; }
-  .main-tab { font-size: 0.75rem; padding: 8px 8px; }
+}
+
+/* =========================================================
+   SHELL estilo CRM — menu lateral verde-escuro + conteudo claro
+   ========================================================= */
+body { background: var(--bg); color: var(--text); }
+.app { display: flex; gap: 12px; align-items: flex-start; padding: 12px; min-height: 100vh; max-width: 1480px; margin: 0 auto; }
+
+/* Scrollbar clara (CRM) */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBDCD8; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #B4CCC6; }
+.menu-escuro ::-webkit-scrollbar-thumb { background: #4A625A; }
+.menu-escuro ::-webkit-scrollbar-thumb:hover { background: #5A7469; }
+
+/* ---- lateral ---- */
+.sidebar {
+  width: 236px; flex: 0 0 236px;
+  position: sticky; top: 12px;
+  height: calc(100vh - 24px);
+  background: var(--menu); color: var(--menuTxt);
+  border-radius: 24px; overflow: hidden;
+  box-shadow: 0 10px 40px -12px rgba(35,51,47,.35);
+  display: flex; flex-direction: column;
+}
+.side-brand { padding: 26px 20px 16px; text-align: center; }
+.side-avatar {
+  width: 76px; height: 76px; margin: 0 auto; border-radius: 50%;
+  background: var(--menu2); display: grid; place-items: center; font-size: 34px;
+  box-shadow: 0 0 0 2px rgba(227,163,27,.6);
+}
+.side-brand .header-left { margin-top: 12px; display: block; }
+.side-brand h1 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--menuTxt); line-height: 1.25; }
+.side-sub { font-size: 0.62rem; color: var(--menuMute); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.side-club { display: block; margin-top: 14px; }
+.side-club select { width: 100%; background: var(--menu2); color: var(--menuTxt); border: 1px solid rgba(255,255,255,.12); font-weight: 600; }
+.side-club select:hover, .side-club select:focus { border-color: var(--accent); }
+.side-club::after { border-top-color: var(--menuMute); }
+
+.side-nav { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.side-nav .main-tab {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 11px 12px; border-radius: 12px; cursor: pointer;
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--menuMute); background: transparent; border: none; transition: all .15s;
+}
+.side-nav .main-tab .ic { font-size: 1rem; line-height: 1; opacity: .9; }
+.side-nav .main-tab:hover:not(.active) { color: var(--menuTxt); background: rgba(255,255,255,.06); }
+.side-nav .main-tab.active { background: var(--bg); color: var(--text); font-weight: 700; box-shadow: var(--soft-shadow); }
+
+.side-foot { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.10); display: flex; flex-direction: column; gap: 8px; }
+.side-refresh { width: 100%; justify-content: center; background: var(--menu2); border-color: rgba(255,255,255,.12); color: var(--menuTxt); }
+.side-refresh:hover { background: rgba(255,255,255,.10); border-color: var(--accent); color: #fff; }
+.side-foot .updated-at { font-size: 0.62rem; color: var(--menuMute); text-align: center; }
+
+/* ---- conteudo ---- */
+.content { flex: 1; min-width: 0; max-width: 1180px; }
+
+/* ---- componentes na paleta clara ---- */
+.card, .section { box-shadow: var(--soft-shadow); }
+.card { border-radius: 16px; }
+.section { border-radius: 16px; }
+.btn { box-shadow: 0 1px 1px rgba(35,51,47,.04); }
+.btn-green { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn-green:hover { background: var(--accent2); border-color: var(--accent2); opacity: 1; }
+.btn-meteorico { background: linear-gradient(135deg, #3A5049, #2c3f39); border-color: #2c3f39; color: #fff; }
+.btn-meteorico:hover { background: linear-gradient(135deg, #31453F, #233029); }
+.btn-captacao { background: linear-gradient(135deg, #17A2A0, #0f8a88); border-color: #0f8a88; color: #fff; }
+.btn-captacao:hover { background: linear-gradient(135deg, #0f8a88, #0b7472); opacity: 1; }
+td { border-bottom: 1px solid rgba(35,51,47,.07); }
+tr.clickable:hover td { background: rgba(227,163,27,.07); }
+.venda-item { border-bottom: 1px solid rgba(35,51,47,.06); }
+.produto-row { border-bottom: 1px solid rgba(35,51,47,.06); }
+.filter-bar, .main-tabs { box-shadow: var(--soft-shadow); }
+.modal-overlay { background: rgba(35,51,47,.45); }
+.modal { box-shadow: 0 24px 60px -20px rgba(35,51,47,.5); }
+.toggle input:checked + .toggle-slider:before { background: #fff; }
+.form-group input, .form-group select, .form-group textarea { background: var(--card-hover); }
+.filter-bar select, .filter-bar input { background: var(--card-hover); }
+
+/* ---- responsivo: lateral vira topo ---- */
+@media (max-width: 860px) {
+  .app { flex-direction: column; padding: 8px; }
+  .sidebar { width: 100%; flex: none; height: auto; position: static; flex-direction: column; }
+  .side-brand { padding: 16px 16px 10px; }
+  .side-avatar { width: 56px; height: 56px; font-size: 26px; }
+  .side-nav { flex-direction: row; flex-wrap: wrap; padding: 10px; }
+  .side-nav .main-tab { width: auto; flex: 1 1 auto; justify-content: center; }
+  .content { max-width: 100%; width: 100%; }
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <h1><span>😴</span> Clube do Soninho</h1>
-    </div>
-    <div class="header-right">
-      <div class="club-dropdown">
+<div class="app">
+  <!-- ===================== MENU LATERAL ===================== -->
+  <aside class="sidebar menu-escuro">
+    <div class="side-brand">
+      <div class="side-avatar" id="sideAvatar">😴</div>
+      <div class="header-left"><h1>Clube do Soninho</h1></div>
+      <p class="side-sub">central do meteórico</p>
+      <div class="club-dropdown side-club">
         <select id="clubSelect" onchange="switchClub(this.value)">
           <option value="soninho">😴 Clube do Soninho</option>
           <option value="tete">🤱 Clube do Tete</option>
         </select>
       </div>
-      <span class="updated-at" id="updatedAt"></span>
-      <button class="btn btn-sm" onclick="loadData()">Atualizar</button>
     </div>
-  </div>
+    <nav class="side-nav">
+      <div class="main-tab active" onclick="switchTab('dashboard')"><span class="ic">📊</span>Dashboard</div>
+      <div class="main-tab" onclick="switchTab('grupos')"><span class="ic">📱</span>Grupos</div>
+      <div class="main-tab" onclick="switchTab('produtos')"><span class="ic">📦</span>Produtos</div>
+      <div class="main-tab" onclick="switchTab('interacoes')"><span class="ic">💬</span>Interações</div>
+    </nav>
+    <div class="side-foot">
+      <button class="btn btn-sm side-refresh" onclick="loadData()">↻ Atualizar</button>
+      <span class="updated-at" id="updatedAt"></span>
+    </div>
+  </aside>
 
-  <!-- Main tabs -->
-  <div class="main-tabs">
-    <div class="main-tab active" onclick="switchTab('dashboard')">Dashboard</div>
-    <div class="main-tab" onclick="switchTab('grupos')">Grupos</div>
-    <div class="main-tab" onclick="switchTab('produtos')">Produtos</div>
-    <div class="main-tab" onclick="switchTab('interacoes')">Interacoes</div>
-  </div>
+  <!-- ===================== CONTEUDO ===================== -->
+  <main class="content">
 
   <!-- ===================== TAB: DASHBOARD ===================== -->
   <div id="tab-dashboard" class="main-panel active">
@@ -343,6 +445,7 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
       </div>
     </div>
   </div>
+  </main>
 </div>
 
 <!-- ===================== MODAL: Novo Grupo ===================== -->
@@ -524,8 +627,11 @@ function switchClub(clubId) {
   const sel = document.getElementById('clubSelect');
   if (sel && sel.value !== clubId) sel.value = clubId;
 
-  // Update header name
-  document.querySelector('.header-left h1').innerHTML = `<span>${club.icon}</span> ${club.nome}`;
+  // Update sidebar brand (nome + avatar)
+  const h1 = document.querySelector('.header-left h1');
+  if (h1) h1.textContent = club.nome;
+  const av = document.getElementById('sideAvatar');
+  if (av) av.textContent = club.icon;
 
   // Apply club theme colors
   applyClubTheme(clubId);
@@ -539,32 +645,14 @@ function switchClub(clubId) {
 
 // ===================== CLUB THEME =====================
 function applyClubTheme(clubId) {
-  const themes = {
-    tete: {
-      bgGradient: 'radial-gradient(ellipse at top left, rgba(244,114,182,0.06) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(244,114,182,0.04) 0%, transparent 50%)',
-      accent: '#f472b6',
-      accentBg: 'rgba(244,114,182,0.12)',
-      tabActive: '#f472b6',
-      tabActiveText: '#000',
-      cardBorderHover: '#f472b6',
-    },
-    soninho: {
-      bgGradient: 'radial-gradient(ellipse at top left, rgba(129,140,248,0.06) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(129,140,248,0.04) 0%, transparent 50%)',
-      accent: '#818cf8',
-      accentBg: 'rgba(129,140,248,0.12)',
-      tabActive: '#818cf8',
-      tabActiveText: '#fff',
-      cardBorderHover: '#818cf8',
-    }
-  };
-  const t = themes[clubId] || themes.tete;
+  // Paleta unica do CRM (dourado) pros dois clubes — o clube muda so o icone/nome.
   const root = document.documentElement;
-  document.body.style.background = `var(--bg)`;
-  document.body.style.backgroundImage = t.bgGradient;
-  root.style.setProperty('--club-accent', t.accent);
-  root.style.setProperty('--club-accent-bg', t.accentBg);
-  root.style.setProperty('--club-tab-active', t.tabActive);
-  root.style.setProperty('--club-tab-text', t.tabActiveText);
+  document.body.style.background = 'var(--bg)';
+  document.body.style.backgroundImage = 'none';
+  root.style.setProperty('--club-accent', '#E3A31B');
+  root.style.setProperty('--club-accent-bg', 'rgba(227,163,27,0.12)');
+  root.style.setProperty('--club-tab-active', '#E3A31B');
+  root.style.setProperty('--club-tab-text', '#fff');
 }
 // Apply initial theme
 applyClubTheme('soninho');
