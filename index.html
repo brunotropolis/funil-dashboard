@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Meteorico</title>
+<title>PAINEL METEÓRICO | by brunotropolis</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzNBNTA0OSIvPjxnIHN0cm9rZT0iI0UzQTMxQiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIj48cGF0aCBkPSJNMjUgNi41IEwxMyAxOC41IiBzdHJva2Utd2lkdGg9IjMuNCIvPjxwYXRoIGQ9Ik0yOC41IDEwIEwyMCAxOC41IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9Ii42NSIvPjxwYXRoIGQ9Ik0yMS41IDUgTDE1LjUgMTEiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjY1Ii8+PC9nPjxjaXJjbGUgY3g9IjEyIiBjeT0iMjAiIHI9IjQuMyIgZmlsbD0iI0UzQTMxQiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMjAiIHI9IjEuOSIgZmlsbD0iI0ZCRjRFOCIvPjxjaXJjbGUgY3g9IjI2LjUiIGN5PSIyNCIgcj0iMS4xIiBmaWxsPSIjRTdFRUVDIi8+PGNpcmNsZSBjeD0iNyIgY3k9IjguNSIgcj0iMSIgZmlsbD0iI0U3RUVFQyIvPjwvc3ZnPg==">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzNBNTA0OSIvPjxnIHN0cm9rZT0iI0UzQTMxQiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIj48cGF0aCBkPSJNMjUgNi41IEwxMyAxOC41IiBzdHJva2Utd2lkdGg9IjMuNCIvPjxwYXRoIGQ9Ik0yOC41IDEwIEwyMCAxOC41IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9Ii42NSIvPjxwYXRoIGQ9Ik0yMS41IDUgTDE1LjUgMTEiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjY1Ii8+PC9nPjxjaXJjbGUgY3g9IjEyIiBjeT0iMjAiIHI9IjQuMyIgZmlsbD0iI0UzQTMxQiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMjAiIHI9IjEuOSIgZmlsbD0iI0ZCRjRFOCIvPjxjaXJjbGUgY3g9IjI2LjUiIGN5PSIyNCIgcj0iMS4xIiBmaWxsPSIjRTdFRUVDIi8+PGNpcmNsZSBjeD0iNyIgY3k9IjguNSIgcj0iMSIgZmlsbD0iI0U3RUVFQyIvPjwvc3ZnPg==">
 <style>
 :root {
   /* Paleta do CRM (Manual do Recem-Nascido): fundo claro esverdeado,
@@ -267,6 +269,15 @@ body { background: var(--bg); color: var(--text); }
 .side-nav .main-tab .ic { font-size: 0.9rem; line-height: 1; opacity: .9; }
 .side-nav .main-tab:hover:not(.active) { color: var(--menuTxt); background: rgba(255,255,255,.06); }
 .side-nav .main-tab.active { background: var(--bg); color: var(--text); font-weight: 700; box-shadow: var(--soft-shadow); }
+.side-nav .side-link {
+  display: flex; align-items: center; gap: 10px; width: 100%; flex: 0 0 auto;
+  padding: 11px 10px 7px; margin-top: 6px; border-radius: 9px; cursor: pointer;
+  font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--menuMute); background: transparent; text-decoration: none; transition: all .15s;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+.side-nav .side-link .ic { font-size: 0.9rem; line-height: 1; opacity: .9; }
+.side-nav .side-link:hover { color: var(--menuTxt); background: rgba(255,255,255,.06); }
 
 .side-foot { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.10); display: flex; flex-direction: column; gap: 8px; }
 .side-refresh { width: 100%; justify-content: center; background: var(--menu2); border-color: rgba(255,255,255,.12); color: var(--menuTxt); }
@@ -325,6 +336,7 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
       <div class="main-tab" onclick="switchTab('grupos')"><span class="ic">📱</span>Grupos</div>
       <div class="main-tab" onclick="switchTab('produtos')"><span class="ic">📦</span>Produtos</div>
       <div class="main-tab" onclick="switchTab('interacoes')"><span class="ic">💬</span>Interações</div>
+      <a class="side-link" href="https://crm.manualdorecemnascido.com.br" target="_blank" rel="noopener"><span class="ic">👶</span>CRM Manual</a>
     </nav>
     <div class="side-foot">
       <button class="btn btn-sm side-refresh" onclick="loadData()">Atualizar</button>
@@ -1344,4 +1356,3 @@ setInterval(loadData, 5 * 60 * 1000);
 </script>
 </body>
 </html>
-<!-- deploy 292157 -->
