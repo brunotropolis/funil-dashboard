@@ -335,6 +335,7 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
       <div class="main-tab active" onclick="switchTab('dashboard')"><span class="ic">📊</span>Dashboard</div>
       <div class="main-tab" onclick="switchTab('grupos')"><span class="ic">📱</span>Grupos</div>
       <div class="main-tab" onclick="switchTab('produtos')"><span class="ic">📦</span>Produtos</div>
+      <div class="main-tab" onclick="switchTab('entradas')"><span class="ic">📈</span>Entradas</div>
       <div class="main-tab" onclick="switchTab('interacoes')"><span class="ic">💬</span>Interações</div>
       <a class="side-link" href="https://crm.manualdorecemnascido.com.br" target="_blank" rel="noopener"><span class="ic">👶</span>CRM Manual</a>
     </nav>
@@ -449,6 +450,42 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
     <div class="section">
       <div id="interacoesContent">
         <div class="empty">Selecione um grupo para ver as interacoes dos leads.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB: ENTRADAS ===================== -->
+  <div id="tab-entradas" class="main-panel">
+    <div class="section-header" style="margin-bottom:14px;">
+      <div class="section-title"><span class="icon">📈</span> Análise de Entradas — últimos 3 meses</div>
+      <span class="updated-at" id="entPeriodo"></span>
+    </div>
+    <div id="entLoading" class="loading"><span class="spinner"></span> Carregando análise...</div>
+    <div id="entBody" style="display:none;">
+      <div class="cards" id="entKpis"></div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:6px;"><span class="icon">📅</span> Entradas por dia
+          <span style="font-weight:400;color:var(--muted);font-size:0.72rem;margin-left:6px;">🟡 pico fora do padrão · 🔵 dia com reel de captação</span>
+        </div>
+        <div class="table-scroll" id="entDaily"></div>
+      </div>
+      <div class="grid-2">
+        <div class="section">
+          <div class="section-title" style="margin-bottom:10px;"><span class="icon">🗓️</span> Entradas por semana</div>
+          <div id="entWeekly"></div>
+        </div>
+        <div class="section">
+          <div class="section-title" style="margin-bottom:10px;"><span class="icon">📊</span> Média por dia da semana</div>
+          <div id="entWeekday"></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:10px;"><span class="icon">🚨</span> Picos fora do padrão + reel do dia</div>
+        <div class="table-scroll" id="entSpikes"></div>
+      </div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:10px;"><span class="icon">🎬</span> Reels de captação no Instagram</div>
+        <div class="table-scroll" id="entReels"></div>
       </div>
     </div>
   </div>
@@ -667,7 +704,7 @@ applyClubTheme('soninho');
 // ===================== TAB SWITCHING =====================
 function switchTab(name) {
   document.querySelectorAll('.main-tab').forEach((t, i) => {
-    const tabNames = ['dashboard','grupos','produtos','interacoes'];
+    const tabNames = ['dashboard','grupos','produtos','entradas','interacoes'];
     t.classList.toggle('active', tabNames[i] === name);
   });
   document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
@@ -676,7 +713,126 @@ function switchTab(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'grupos') renderGruposList();
   if (name === 'produtos') renderProdutos();
+  if (name === 'entradas') renderEntradas();
   if (name === 'interacoes') renderInteracoes();
+}
+
+// ===================== ENTRADAS (analise) =====================
+let ENT = null;
+const DIASEM = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+const DIASEM_FULL = ['Domingo','Segunda','Terca','Quarta','Quinta','Sexta','Sabado'];
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function fmtDia(s){ if(!s) return ''; const p=s.split('-'); return p[2]+'/'+p[1]; }
+function dowOf(s){ return new Date(s+'T12:00:00Z').getUTCDay(); }
+function addDias(s,n){ const d=new Date(s+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().substring(0,10); }
+
+async function renderEntradas(){
+  const load=document.getElementById('entLoading'), body=document.getElementById('entBody');
+  if(!ENT){
+    load.style.display=''; body.style.display='none';
+    try{ const r=await apiFetch(API_URL+'?view=entradas'); ENT=await r.json(); }
+    catch(e){ load.innerHTML='Erro ao carregar: '+e.message; return; }
+  }
+  const d=ENT;
+  if(!d || !d.dias){ load.innerHTML='Sem dados de entradas.'; return; }
+  load.style.display='none'; body.style.display='';
+  document.getElementById('entPeriodo').textContent = fmtDia(d.periodo.de)+' a '+fmtDia(d.periodo.ate);
+
+  const melhor=[...d.weekday].sort((a,b)=>b.media-a.media)[0];
+  const pico=(d.spikes||[])[0];
+  const reelsCta=(d.reels||[]).filter(r=>r.cta).length;
+  const nval=v=>String(v).replace('.',',');
+  document.getElementById('entKpis').innerHTML =
+    kpiEnt('Entradas (90 dias)', fmt(d.total)) +
+    kpiEnt('Media por dia', nval(d.media_dia)) +
+    kpiEnt('Melhor dia', melhor.dia, nval(melhor.media)+' / dia', 'green') +
+    (pico?kpiEnt('Maior pico', fmt(pico.count), pico.dia+' '+fmtDia(pico.date), 'yellow'):'') +
+    kpiEnt('Reels de captacao', fmt(reelsCta), 'nos 90 dias', 'blue');
+
+  const reelDays=new Set((d.reels||[]).filter(r=>r.cta).map(r=>r.date));
+  const spikeDays=new Set((d.spikes||[]).map(s=>s.date));
+  document.getElementById('entDaily').innerHTML = chartDaily(d.dias, spikeDays, reelDays);
+  document.getElementById('entWeekly').innerHTML = chartWeekly(d.semanas);
+  document.getElementById('entWeekday').innerHTML = chartWeekday(d.weekday);
+  document.getElementById('entSpikes').innerHTML = tableSpikes(d.spikes, d.reels);
+  document.getElementById('entReels').innerHTML = tableReels(d.reels, d.ig_erro);
+}
+function kpiEnt(label,val,sub,cls){ return `<div class="card"><div class="card-label">${label}</div><div class="card-value ${cls||''}" style="font-size:1.5rem;">${val}</div>${sub?`<div class="card-sub">${sub}</div>`:''}</div>`; }
+
+function chartDaily(dias, spikeDays, reelDays){
+  const H=180, pad=22, bw=9, gap=2;
+  const W=Math.max(740, dias.length*(bw+gap)+pad*2);
+  const max=Math.max(1,...dias.map(x=>x.count));
+  const sh=H-pad*2-10;
+  let bars='', marks='', months='', lastM='';
+  dias.forEach((x,i)=>{
+    const h=Math.round(x.count/max*sh);
+    const xx=pad+i*(bw+gap), yy=H-pad-h;
+    const spk=spikeDays.has(x.date);
+    bars+=`<rect x="${xx}" y="${yy}" width="${bw}" height="${h}" rx="1.5" fill="${spk?'var(--accent)':'#6E9488'}"><title>${fmtDia(x.date)} (${DIASEM[x.dow]}): ${x.count}</title></rect>`;
+    if(spk) bars+=`<text x="${xx+bw/2}" y="${yy-3}" font-size="8.5" fill="var(--accent2)" text-anchor="middle" font-weight="700">${x.count}</text>`;
+    if(reelDays.has(x.date)) marks+=`<circle cx="${xx+bw/2}" cy="${H-pad+6}" r="2.6" fill="#3b82f6"><title>Reel de captacao em ${fmtDia(x.date)}</title></circle>`;
+    const mo=x.date.substring(5,7);
+    if(mo!==lastM){ lastM=mo; months+=`<text x="${xx}" y="${H-3}" font-size="9" fill="var(--muted)">${MESES[parseInt(mo)-1]}</text>`; }
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:none;display:block;">
+    <line x1="${pad}" y1="${H-pad}" x2="${W-4}" y2="${H-pad}" stroke="var(--border)"/>${bars}${marks}${months}</svg>`;
+}
+
+function chartWeekly(semanas){
+  const H=210, pad=30, n=Math.max(1,semanas.length), slot=Math.max(40,(660-pad*2)/n), bw=Math.min(30,slot-12);
+  const W=Math.max(600, pad*2+n*slot);
+  const max=Math.max(1,...semanas.map(x=>x.count)), sh=H-pad*2;
+  let out='';
+  semanas.forEach((x,i)=>{
+    const h=Math.round(x.count/max*sh), xx=pad+i*slot+(slot-bw)/2, yy=H-pad-h;
+    out+=`<rect x="${xx}" y="${yy}" width="${bw}" height="${h}" rx="3" fill="#6E9488"><title>Semana de ${fmtDia(x.semana)}: ${x.count}</title></rect>`;
+    out+=`<text x="${xx+bw/2}" y="${yy-4}" font-size="10" fill="var(--text)" text-anchor="middle" font-weight="600">${x.count}</text>`;
+    out+=`<text x="${xx+bw/2}" y="${H-10}" font-size="9" fill="var(--muted)" text-anchor="middle">${fmtDia(x.semana)}</text>`;
+  });
+  return `<div class="table-scroll"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="display:block;"><line x1="${pad}" y1="${H-pad}" x2="${W-4}" y2="${H-pad}" stroke="var(--border)"/>${out}</svg></div>`;
+}
+
+function chartWeekday(weekday){
+  const order=[1,2,3,4,5,6,0];
+  const wd=order.map(i=>weekday.find(w=>w.dow===i)).filter(Boolean);
+  const max=Math.max(1,...wd.map(w=>w.media));
+  let out='';
+  wd.forEach(w=>{
+    const pct=Math.round(w.media/max*100), strong=w.media===max;
+    out+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="width:66px;font-size:0.75rem;color:var(--muted);">${w.dia}</div>
+      <div style="flex:1;background:var(--card-hover);border-radius:6px;height:22px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${strong?'var(--accent)':'#6E9488'};"></div>
+      </div>
+      <div style="width:42px;text-align:right;font-weight:700;font-size:0.85rem;${strong?'color:var(--accent2);':''}">${String(w.media).replace('.',',')}</div>
+    </div>`;
+  });
+  return out;
+}
+
+function tableSpikes(spikes, reels){
+  if(!spikes || !spikes.length) return '<div class="empty">Sem picos fora do padrao no periodo.</div>';
+  const byDate={}; (reels||[]).forEach(r=>{ (byDate[r.date]=byDate[r.date]||[]).push(r); });
+  let rows='';
+  spikes.forEach(s=>{
+    const hoje=(byDate[s.date]||[]).filter(r=>r.cta);
+    const vesp=(byDate[addDias(s.date,-1)]||[]).filter(r=>r.cta);
+    const reel=hoje[0]||vesp[0];
+    const rt=reel?`<a href="${reel.permalink}" target="_blank" style="color:var(--accent2);text-decoration:none;">${reel.date===s.date?'':'<span style="color:var(--muted);">(vespera)</span> '}${reel.caption.substring(0,55)}…</a> <span style="color:var(--muted);">❤${fmt(reel.likes)} 💬${fmt(reel.comments)}</span>`:'<span style="color:var(--muted);">— sem reel —</span>';
+    rows+=`<tr><td>${fmtDia(s.date)}</td><td>${s.dia}</td><td style="font-weight:700;color:var(--accent2);">${s.count}</td><td>${rt}</td></tr>`;
+  });
+  return `<table><thead><tr><th>Data</th><th>Dia</th><th>Entradas</th><th>Reel de captacao relacionado</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function tableReels(reels, igErro){
+  const cta=(reels||[]).filter(r=>r.cta).sort((a,b)=> a.date<b.date?1:-1);
+  if(!cta.length) return `<div class="empty">Nenhum reel de captacao encontrado${igErro?' (Instagram: '+igErro+')':''}.</div>`;
+  let rows='';
+  cta.slice(0,40).forEach(r=>{
+    rows+=`<tr><td>${fmtDia(r.date)}</td><td>${DIASEM_FULL[dowOf(r.date)]}</td><td>${r.hora}</td><td>❤ ${fmt(r.likes)}</td><td>💬 ${fmt(r.comments)}</td><td style="max-width:300px;font-size:0.78rem;">${r.caption.substring(0,90)}</td><td><a href="${r.permalink}" target="_blank"><button class="btn btn-sm">Ver ›</button></a></td></tr>`;
+  });
+  return `<table><thead><tr><th>Data</th><th>Dia</th><th>Hora</th><th>Likes</th><th>Coment.</th><th>Legenda</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 // ===================== MODAL =====================
@@ -692,6 +848,8 @@ async function loadData() {
     document.getElementById('updatedAt').textContent = 'Carregando...';
     const resp = await apiFetch(API_URL);
     DATA = await resp.json();
+    ENT = null;
+    if (document.getElementById('tab-entradas').classList.contains('active')) renderEntradas();
     renderAll();
     document.getElementById('updatedAt').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
   } catch (e) {
