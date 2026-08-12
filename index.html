@@ -337,6 +337,7 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
       <div class="main-tab" onclick="switchTab('produtos')"><span class="ic">📦</span>Produtos</div>
       <div class="main-tab" onclick="switchTab('entradas')"><span class="ic">📈</span>Entradas</div>
       <div class="main-tab" onclick="switchTab('interacoes')"><span class="ic">💬</span>Interações</div>
+      <div class="main-tab" onclick="switchTab('ativadoras')"><span class="ic">📣</span>Ativadoras</div>
       <a class="side-link" href="https://crm.manualdorecemnascido.com.br" target="_blank" rel="noopener"><span class="ic">👶</span>CRM Manual</a>
     </nav>
     <div class="side-foot">
@@ -488,6 +489,14 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
         <div class="table-scroll" id="entReels"></div>
       </div>
     </div>
+  </div>
+  <!-- ===================== TAB: ATIVADORAS ===================== -->
+  <div id="tab-ativadoras" class="main-panel">
+    <div class="section-header" style="margin-bottom:12px">
+      <div class="section-title"><span class="icon">📣</span> Ativadoras — perfis que aquecem o grupo</div>
+    </div>
+    <p style="color:var(--muted);margin:-4px 0 16px 0;font-size:.85rem">Perfis (clientes) que postam relatos no <b>grupo ativo</b> do meteórico pra incentivar a compra. Disparo automático via n8n, sempre <b>só no grupo da semana</b> — nunca nos outros grupos.</p>
+    <div id="ativadorasList"></div>
   </div>
   </main>
 </div>
@@ -704,7 +713,7 @@ applyClubTheme('soninho');
 // ===================== TAB SWITCHING =====================
 function switchTab(name) {
   document.querySelectorAll('.main-tab').forEach((t, i) => {
-    const tabNames = ['dashboard','grupos','produtos','entradas','interacoes'];
+    const tabNames = ['dashboard','grupos','produtos','entradas','interacoes','ativadoras'];
     t.classList.toggle('active', tabNames[i] === name);
   });
   document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
@@ -715,6 +724,51 @@ function switchTab(name) {
   if (name === 'produtos') renderProdutos();
   if (name === 'entradas') renderEntradas();
   if (name === 'interacoes') renderInteracoes();
+  if (name === 'ativadoras') renderAtivadoras();
+}
+
+// ===================== ATIVADORAS (clientes-fake que ativam o grupo) =====================
+// Espelha o workflow n8n "SONINHO | Cliente Fake Fernanda (recorrente)" (2eo6gUSsbA0GVAK4).
+// Enviam SÓ no grupo ATIVO do meteórico. Atualizar aqui quando mudar o workflow.
+const ATIVADORAS = [
+  {
+    nome: 'Fernanda',
+    numero: '+55 41 93618-0713',
+    ativa: true,
+    obs: 'Envia somente no grupo ATIVO da semana (nunca nos outros grupos).',
+    mensagens: [
+      { dia: 'Quarta', hora: '10:05', texto: 'Meu bebê tem 24 dias e simplesmente não dorme no berço, nunca dormiu. Desde sempre eu e meu marido nos revezamos para dormir com ele sentados na cama. Estamos exaustos. O curso serve para recém-nascido também ou preciso esperar ele ficar maior?' },
+      { dia: 'Quarta', hora: '10:06', texto: 'Já tentei deixar chorando no berço, mas não é pra mim, eu morro de dó. O método é gentil mesmo? Sem choro mesmo?' },
+      { dia: 'Quinta', hora: '09:12', texto: 'Eu comprei ❤️ Meu bebê só dorme no colo desde que nasceu. E pelo o que eu vi de outras mães isso não se resolve sozinho, por isso já vou dar o jeito já!!!' },
+      { dia: 'Quinta', hora: '10:34', texto: 'Meninas, eu precisava compartilhar isso 😭 Vi as primeiras aulas com meu filho dormindo no colo, como sempre. Então decidi fazer o que a Day explica p/ recém-nascidos e estou pasma. Ele está no berço agora, pela primeira vez na vida!!! São os primeiros 20 minutos da vida dele sem estar no colo!! Já valeu a pena!!' },
+    ]
+  }
+];
+
+function renderAtivadoras() {
+  const wrap = document.getElementById('ativadorasList');
+  if (!wrap) return;
+  const diaCor = { 'Quarta': '#7c5cff', 'Quinta': '#e3a31b' };
+  let html = '';
+  for (const a of ATIVADORAS) {
+    html += '<div class="section" style="margin-bottom:18px">';
+    html += '<div class="section-header"><div class="section-title"><span class="icon">📣</span> ' + a.nome +
+            '</div><span class="badge ' + (a.ativa ? 'badge-ativo' : 'badge-pendente') + '">' + (a.ativa ? 'ATIVA' : 'PAUSADA') + '</span></div>';
+    html += '<div style="display:flex;gap:24px;flex-wrap:wrap;margin:6px 0 14px 0">' +
+            '<div><div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Aparelho / número</div>' +
+            '<div style="font-weight:700;font-size:1.05rem">' + a.numero + '</div></div>' +
+            '<div style="flex:1;min-width:220px"><div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Destino</div>' +
+            '<div style="font-weight:600">' + a.obs + '</div></div></div>';
+    html += '<div class="table-scroll"><table><thead><tr><th style="width:80px">Dia</th><th style="width:70px">Horário</th><th>Mensagem</th></tr></thead><tbody>';
+    for (const m of a.mensagens) {
+      const c = diaCor[m.dia] || 'var(--green)';
+      html += '<tr><td><span class="badge" style="background:' + c + ';color:#fff">' + m.dia + '</span></td>' +
+              '<td style="font-weight:700">' + m.hora + '</td>' +
+              '<td style="white-space:normal;line-height:1.4">' + m.texto.replace(/</g, '&lt;') + '</td></tr>';
+    }
+    html += '</tbody></table></div></div>';
+  }
+  wrap.innerHTML = html;
 }
 
 // ===================== ENTRADAS (analise) =====================
