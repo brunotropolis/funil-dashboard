@@ -383,6 +383,13 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
 
     <div class="section">
       <div class="section-header">
+        <div class="section-title"><span class="icon">🏷️</span> Vendas sem grupo <span style="font-size:.72rem;color:var(--muted);font-weight:400">(comprou mas não casou com membro — pra conferir)</span></div>
+      </div>
+      <div id="dashSemGrupo"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
         <div class="section-title"><span class="icon">🚀</span> Todos os Meteoricos</div>
       </div>
       <div class="table-scroll" id="dashMeteoricosList"></div>
@@ -985,7 +992,21 @@ function renderDashboard() {
     <div class="card"><div class="card-label">Conversao Media</div><div class="card-value pink">${fmtPct(conversaoMedia)}</div></div>
     <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div></div>
     <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(totalSaidas)}</div><div class="card-sub">${totalLeads > 0 ? fmtPct(totalSaidas/totalLeads*100) : '0%'} do total</div></div>
+    <div class="card"><div class="card-label">Estava no grupo</div><div class="card-value green">${fmt(d.estava_no_grupo != null ? d.estava_no_grupo : totalVendas)}</div><div class="card-sub">${(d.nao_estava_no_grupo || 0)} venda(s) sem grupo</div></div>
   `;
+
+  // Vendas sem grupo (não estava no grupo) — controle de atribuição
+  const semGrupo = (DATA.dashboard && DATA.dashboard.vendas_sem_grupo) || [];
+  const sgEl = document.getElementById('dashSemGrupo');
+  if (sgEl) {
+    if (!semGrupo.length) { sgEl.innerHTML = '<div class="empty">Todas as vendas casaram com um membro do grupo. 👌</div>'; }
+    else {
+      sgEl.innerHTML = semGrupo.map(v => `<div class="venda-item">
+        <div class="venda-item-left"><span class="venda-item-qty" style="background:#f59e0b22;color:#f59e0b">fora</span><span class="venda-item-name">${v.nome} — ${v.produto}</span></div>
+        <span class="venda-item-value">${fmtMoney(v.valor||0)}</span>
+      </div>`).join('');
+    }
+  }
 
   // Vendas por produto
   const vpEl = document.getElementById('dashVendasProduto');
