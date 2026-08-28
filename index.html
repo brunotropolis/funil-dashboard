@@ -334,7 +334,30 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
   .sidebar.open { transform: translateX(0); }
   /* fundo escuro atrás da gaveta */
   .drawer-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }
-  .content { max-width: 100%; width: 100%; padding: 12px; }
+  .content { max-width: 100%; width: 100%; padding: 12px; min-width: 0; }
+  /* barra do topo preenche a linha inteira (senão só pega a largura do texto) */
+  .app { align-items: stretch; }
+  .mobile-top { width: 100%; }
+
+  /* fontes um pouco menores no mobile — menos encavalado, ainda legível */
+  .card { padding: 13px 15px; }
+  .card-value { font-size: 1.3rem; }
+  .card-label { font-size: 0.64rem; }
+  .section-title { font-size: 0.85rem; }
+  .section-title .icon { font-size: 1rem; }
+  table, th, td { font-size: 0.72rem; }
+  th, td { padding: 6px 8px; }
+  .header-left h1 { font-size: 1.1rem; }
+  .grupo-detail-header h2 { font-size: 1.05rem; }
+  .filter-bar { padding: 8px 12px; }
+  .produto-nome { font-size: 0.84rem; }
+  .produto-meta { font-size: 0.72rem; }
+  .venda-item-name, .venda-item-value { font-size: 0.8rem; }
+
+  /* aba Produtos: linha quebra, ações vão pra baixo (não estoura a largura) */
+  .produto-row { flex-wrap: wrap; }
+  .produto-info { min-width: 0; flex: 1 1 100%; }
+  .produto-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
 }
 </style>
 </head>
@@ -1370,7 +1393,7 @@ function renderProdutos() {
           ${p.valor_liquido?` — Liquido: ${fmtMoney(parseFloat(p.valor_liquido))}`:''}
           ${p.link_greenn?` — <a href="${p.link_greenn}" target="_blank" style="color:var(--blue);">Greenn</a>`:''}
         </div>
-        ${p.mensagem_pos_compra?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;max-width:500px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Msg: ${p.mensagem_pos_compra}</div>`:''}
+        ${p.mensagem_pos_compra?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Msg: ${p.mensagem_pos_compra}</div>`:''}
       </div>
       <div class="produto-actions">
         <label class="toggle" title="${ativo?'Ativo':'Inativo'}">
