@@ -134,13 +134,7 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 /* Grid layouts */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) {
-  /* qualquer tabela ROLA em vez de encavalar (inclui as sem wrap) */
-  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
-  table th, table td { white-space: nowrap; }
-  .cards { grid-template-columns: repeat(2, 1fr); gap: 9px; }
-}
-@media (max-width: 400px) { .cards { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
 
 /* Filters */
 .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
@@ -315,23 +309,47 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
 .form-group input, .form-group select, .form-group textarea { background: var(--card-hover); }
 .filter-bar select, .filter-bar input { background: var(--card-hover); }
 
-/* ---- responsivo: lateral vira topo ---- */
+/* ---- responsivo: lateral vira GAVETA (drawer), igual ao CRM ---- */
+.mobile-top { display: none; }
+.drawer-overlay { display: none; }
 @media (max-width: 860px) {
-  .app { flex-direction: column; padding: 8px; }
-  .sidebar { width: 100%; flex: none; height: auto; position: static; flex-direction: column; }
-  .side-brand { padding: 16px 16px 10px; }
-  .side-avatar { width: 56px; height: 56px; font-size: 26px; }
-  .side-nav { flex-direction: row; flex-wrap: wrap; padding: 10px; }
-  .side-nav .main-tab { width: auto; flex: 1 1 auto; justify-content: center; }
-  .content { max-width: 100%; width: 100%; }
+  .app { flex-direction: column; padding: 0; gap: 0; }
+  /* barra superior fixa com o hamburguer (só no mobile) */
+  .mobile-top {
+    display: flex; align-items: center; gap: 8px;
+    height: 54px; padding: 0 10px; position: sticky; top: 0; z-index: 30;
+    background: var(--menu); color: var(--menuTxt);
+  }
+  .mobile-top .burger {
+    width: 40px; height: 40px; display: grid; place-items: center; font-size: 20px;
+    background: transparent; border: none; color: var(--menuTxt); cursor: pointer; border-radius: 8px;
+  }
+  .mobile-top .burger:hover { background: rgba(255,255,255,.10); }
+  .mobile-top .mt-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  /* a lateral vira uma gaveta que desliza de fora */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; height: 100%; width: 236px; flex: none;
+    border-radius: 0; z-index: 50; transform: translateX(-100%); transition: transform .2s ease;
+  }
+  .sidebar.open { transform: translateX(0); }
+  /* fundo escuro atrás da gaveta */
+  .drawer-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }
+  .content { max-width: 100%; width: 100%; padding: 12px; }
 }
 </style>
 </head>
 <body>
 
 <div class="app">
+  <!-- topo mobile: só aparece no celular, abre a gaveta -->
+  <div class="mobile-top">
+    <button class="burger" onclick="openDrawer()" aria-label="Abrir menu">☰</button>
+    <span class="mt-title">Meteórico</span>
+  </div>
+  <!-- fundo escuro atrás da gaveta (mobile) -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
   <!-- ===================== MENU LATERAL ===================== -->
-  <aside class="sidebar menu-escuro">
+  <aside class="sidebar menu-escuro" id="sidebar">
     <div class="side-brand">
       <div class="side-avatar" id="sideAvatar">😴</div>
       <div class="header-left"><h1>Clube do Soninho</h1></div>
@@ -385,13 +403,6 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
         </div>
         <div id="dashResumo"></div>
       </div>
-    </div>
-
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title"><span class="icon">🏷️</span> Vendas sem grupo <span style="font-size:.72rem;color:var(--muted);font-weight:400">(comprou mas não casou com membro — pra conferir)</span></div>
-      </div>
-      <div id="dashSemGrupo"></div>
     </div>
 
     <div class="section">
@@ -998,21 +1009,7 @@ function renderDashboard() {
     <div class="card"><div class="card-label">Conversao Media</div><div class="card-value pink">${fmtPct(conversaoMedia)}</div></div>
     <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div></div>
     <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(totalSaidas)}</div><div class="card-sub">${totalLeads > 0 ? fmtPct(totalSaidas/totalLeads*100) : '0%'} do total</div></div>
-    <div class="card"><div class="card-label">Estava no grupo</div><div class="card-value green">${fmt(d.estava_no_grupo != null ? d.estava_no_grupo : totalVendas)}</div><div class="card-sub">${(d.nao_estava_no_grupo || 0)} venda(s) sem grupo</div></div>
   `;
-
-  // Vendas sem grupo (não estava no grupo) — controle de atribuição
-  const semGrupo = (DATA.dashboard && DATA.dashboard.vendas_sem_grupo) || [];
-  const sgEl = document.getElementById('dashSemGrupo');
-  if (sgEl) {
-    if (!semGrupo.length) { sgEl.innerHTML = '<div class="empty">Todas as vendas casaram com um membro do grupo. 👌</div>'; }
-    else {
-      sgEl.innerHTML = semGrupo.map(v => `<div class="venda-item">
-        <div class="venda-item-left"><span class="venda-item-qty" style="background:#f59e0b22;color:#f59e0b">fora</span><span class="venda-item-name">${v.nome} — ${v.produto}</span></div>
-        <span class="venda-item-value">${fmtMoney(v.valor||0)}</span>
-      </div>`).join('');
-    }
-  }
 
   // Vendas por produto
   const vpEl = document.getElementById('dashVendasProduto');
@@ -1588,6 +1585,20 @@ function renderInteracoes() {
   if (!hasContent) html = '<div class="empty">Nenhuma interacao registrada para este grupo.</div>';
   el.innerHTML = html;
 }
+
+// ===================== GAVETA MOBILE (igual CRM) =====================
+function openDrawer() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('show');
+}
+function closeDrawer() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('show');
+}
+// clicar num item do menu fecha a gaveta (some por cima do conteúdo novo)
+document.querySelectorAll('.side-nav .main-tab, .side-nav .side-link').forEach(function (el) {
+  el.addEventListener('click', closeDrawer);
+});
 
 // ===================== INIT =====================
 loadData();
