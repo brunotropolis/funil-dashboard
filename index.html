@@ -134,7 +134,13 @@ tr.clickable:hover td { background: rgba(45,212,160,0.05); }
 /* Grid layouts */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  /* qualquer tabela ROLA em vez de encavalar (inclui as sem wrap) */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  table th, table td { white-space: nowrap; }
+  .cards { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+}
+@media (max-width: 400px) { .cards { grid-template-columns: 1fr; } }
 
 /* Filters */
 .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
@@ -426,6 +432,13 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
         </div>
         <div id="dashResumo"></div>
       </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="icon">🏷️</span> Vendas sem grupo <span style="font-size:.72rem;color:var(--muted);font-weight:400">(comprou mas não casou com membro — pra conferir)</span></div>
+      </div>
+      <div id="dashSemGrupo"></div>
     </div>
 
     <div class="section">
@@ -789,6 +802,27 @@ const ATIVADORAS = [
       { dia: 'Quinta', hora: '09:12', texto: 'Eu comprei ❤️ Meu bebê só dorme no colo desde que nasceu. E pelo o que eu vi de outras mães isso não se resolve sozinho, por isso já vou dar o jeito já!!!' },
       { dia: 'Quinta', hora: '10:34', texto: 'Meninas, eu precisava compartilhar isso 😭 Vi as primeiras aulas com meu filho dormindo no colo, como sempre. Então decidi fazer o que a Day explica p/ recém-nascidos e estou pasma. Ele está no berço agora, pela primeira vez na vida!!! São os primeiros 20 minutos da vida dele sem estar no colo!! Já valeu a pena!!' },
     ]
+  },
+  {
+    nome: 'Jaíne',
+    numero: '+55 21 93618-3013',
+    ativa: true,
+    obs: 'Envia somente no grupo ATIVO da semana (nunca nos outros grupos).',
+    mensagens: [
+      { dia: 'Quarta', hora: '10:04', texto: 'Estou vendo várias mães de bebês bem novinhos, sou fã de vocês!!!\n\nEu fiquei achando que era normal a minha filha só dormir no colo e fui deixando, hoje ela está com 11 meses e continua assim 🙆‍♀️\n\nEstou desesperada e não sei se tem solução, as sonecas são só no colo, e a noite acorda muitas vezes, parece que só faz sonecas.' },
+      { dia: 'Quinta', hora: '09:14', texto: 'Comprei também!!\n\nDeus me ajude que funcione, porque estou esperançosa e arrependida de ter perdido tanto tempo. Não vejo a hora de ver minha bebê dormindo bem principalmente a noite 🙏' },
+    ]
+  },
+  {
+    nome: 'Helena',
+    numero: '+55 11 93624-3586',
+    ativa: true,
+    obs: 'Envia somente no grupo ATIVO da semana (nunca nos outros grupos).',
+    mensagens: [
+      { dia: 'Quarta', hora: '10:03', texto: 'Eu vim por indicação de uma amiga que fez o Dream Baby e amou ❤️. Agora sou eu que preciso de ajuda!! Meu bebê dorme de noite no berço, mas em compensação acorda a cada 1h no máximo 1:30h todas as noite, não aguento mais! Ele já tem 4 meses e meio, já cansei de esperar passar, o bebê da minha prima tem 1ano e meio e ainda é assim SOCORRO! Preciso de ajuda.' },
+      { dia: 'Quinta', hora: '09:07', texto: 'Acabei de garantir minha vaga 🙌\nJá mandei mensagem para a consultora do whats inclusive 😂' },
+      { dia: 'Quinta', hora: '10:05', texto: 'Voltei só para dizer que a Ale já me respondeu 😭❤️\n\nEla já pediu algumas informações sobre o meu bebê e me explicou por onde vamos começar.. estou muito animada, as aulas são bem práticas e a Dai explica de um jeito muito fácil de entende.. o curso é super rapidinho, agora é só colocar em prática!!!' },
+    ]
   }
 ];
 
@@ -811,11 +845,39 @@ function renderAtivadoras() {
       const c = diaCor[m.dia] || 'var(--green)';
       html += '<tr><td><span class="badge" style="background:' + c + ';color:#fff">' + m.dia + '</span></td>' +
               '<td style="font-weight:700">' + m.hora + '</td>' +
-              '<td style="white-space:normal;line-height:1.4">' + m.texto.replace(/</g, '&lt;') + '</td></tr>';
+              '<td style="white-space:pre-line;line-height:1.4">' + m.texto.replace(/</g, '&lt;') + '</td></tr>';
     }
     html += '</tbody></table></div></div>';
   }
+  html += renderVotosEnquetes();
   wrap.innerHTML = html;
+}
+
+// Votos das ativadoras nas enquetes do meteorico (workflow "SONINHO | Ativadoras (Jaine+Helena+Votos)")
+const VOTOS_ENQUETES = [
+  { dia:'Terça', hora:'10:30', pergunta:'Como está a qualidade do sono?', votos:{ 'Fernanda':'Acorda MUITAS vezes', 'Jaíne':'Só dorme no colo', 'Helena':'Acorda algumas vezes' } },
+  { dia:'Terça', hora:'11:30', pergunta:'Você já assistiu a aula?', votos:{ 'Fernanda':'AINDA NÃO!', 'Jaíne':'AINDA NÃO!', 'Helena':'AINDA NÃO!' } },
+  { dia:'Terça', hora:'14:45', pergunta:'Qual é o perfil de sono?', votos:{ 'Fernanda':'Coala', 'Jaíne':'Leão', 'Helena':'Coruja' } },
+  { dia:'Terça', hora:'15:30', pergunta:'Qual idade do seu bebê?', votos:{ 'Fernanda':'Até 30 dias', 'Jaíne':'9–12 meses', 'Helena':'3–6 meses' } },
+  { dia:'Quarta', hora:'11:20', pergunta:'Gostaram da Day gravar em vídeo?', votos:{ 'Fernanda':'MUITO!', 'Jaíne':'MUITO!', 'Helena':'MUITO!' } },
+];
+function renderVotosEnquetes(){
+  const diaCor = { 'Terça':'#2dd4a0', 'Quarta':'#7c5cff', 'Quinta':'#e3a31b' };
+  let h = '<div class="section" style="margin-bottom:18px">';
+  h += '<div class="section-header"><div class="section-title"><span class="icon">🗳️</span> Votos nas enquetes</div></div>';
+  h += '<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">As ativadoras votam nas enquetes do grupo ATIVO, entre 2 e 10 min após cada enquete (uma de cada vez, pra incentivar os leads reais a votarem).</div>';
+  h += '<div class="table-scroll"><table><thead><tr><th style="width:70px">Dia</th><th style="width:60px">Hora</th><th>Enquete</th><th>Fernanda</th><th>Jaíne</th><th>Helena</th></tr></thead><tbody>';
+  for (const e of VOTOS_ENQUETES){
+    const c = diaCor[e.dia] || 'var(--green)';
+    h += '<tr><td><span class="badge" style="background:'+c+';color:#fff">'+e.dia+'</span></td>'+
+         '<td style="font-weight:700">'+e.hora+'</td>'+
+         '<td style="white-space:normal">'+e.pergunta+'</td>'+
+         '<td style="white-space:normal">'+e.votos['Fernanda']+'</td>'+
+         '<td style="white-space:normal">'+e.votos['Jaíne']+'</td>'+
+         '<td style="white-space:normal">'+e.votos['Helena']+'</td></tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
 }
 
 // ===================== ENTRADAS (analise) =====================
@@ -1032,7 +1094,21 @@ function renderDashboard() {
     <div class="card"><div class="card-label">Conversao Media</div><div class="card-value pink">${fmtPct(conversaoMedia)}</div></div>
     <div class="card"><div class="card-label">Leads Captados</div><div class="card-value blue">${fmt(totalLeads)}</div></div>
     <div class="card"><div class="card-label">Saidas</div><div class="card-value red">${fmt(totalSaidas)}</div><div class="card-sub">${totalLeads > 0 ? fmtPct(totalSaidas/totalLeads*100) : '0%'} do total</div></div>
+    <div class="card"><div class="card-label">Estava no grupo</div><div class="card-value green">${fmt(d.estava_no_grupo != null ? d.estava_no_grupo : totalVendas)}</div><div class="card-sub">${(d.nao_estava_no_grupo || 0)} venda(s) sem grupo</div></div>
   `;
+
+  // Vendas sem grupo (não estava no grupo) — controle de atribuição
+  const semGrupo = (DATA.dashboard && DATA.dashboard.vendas_sem_grupo) || [];
+  const sgEl = document.getElementById('dashSemGrupo');
+  if (sgEl) {
+    if (!semGrupo.length) { sgEl.innerHTML = '<div class="empty">Todas as vendas casaram com um membro do grupo. 👌</div>'; }
+    else {
+      sgEl.innerHTML = semGrupo.map(v => `<div class="venda-item">
+        <div class="venda-item-left"><span class="venda-item-qty" style="background:#f59e0b22;color:#f59e0b">fora</span><span class="venda-item-name">${v.nome} — ${v.produto}</span></div>
+        <span class="venda-item-value">${fmtMoney(v.valor||0)}</span>
+      </div>`).join('');
+    }
+  }
 
   // Vendas por produto
   const vpEl = document.getElementById('dashVendasProduto');
