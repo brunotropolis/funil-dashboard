@@ -850,7 +850,25 @@ function renderAtivadoras() {
     html += '</tbody></table></div></div>';
   }
   html += renderVotosEnquetes();
-  wrap.innerHTML = html;
+  wrap.innerHTML = renderLeadsGestantes() + html;
+}
+
+function renderLeadsGestantes(){
+  const leads = (DATA && DATA.leads_gestantes) || [];
+  let h = '<div class="section" style="margin-bottom:18px;border:1px solid #e3a31b">';
+  h += '<div class="section-header"><div class="section-title"><span class="icon">🤰</span> Leads Gestantes</div><span class="badge badge-ativo">'+leads.length+'</span></div>';
+  h += '<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">Quem reagiu ❤️ na mensagem "se você é gestante" no grupo ATIVO. Clique pra abrir a conversa e chamar manualmente.</div>';
+  if (!leads.length){ h += '<div style="color:var(--muted)">Ninguém marcou gestante ainda no grupo ativo.</div></div>'; return h; }
+  h += '<div class="table-scroll"><table><thead><tr><th>Telefone</th><th>Reagiu</th><th style="width:150px">Ação</th></tr></thead><tbody>';
+  for (const l of leads){
+    let tel = (l.telefone||'').replace(/^55/,'');
+    tel = tel.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
+    const quando = l.reagiu_em ? new Date(l.reagiu_em*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    h += '<tr><td style="font-weight:700">'+tel+'</td><td>'+(l.emoji||'❤️')+' <span style="color:var(--muted)">'+quando+'</span></td>'+
+         '<td><a href="'+l.wa_link+'" target="_blank" style="background:#25d366;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-weight:700;white-space:nowrap">💬 Abrir conversa</a></td></tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
 }
 
 // Votos das ativadoras nas enquetes do meteorico (workflow "SONINHO | Ativadoras (Jaine+Helena+Votos)")
