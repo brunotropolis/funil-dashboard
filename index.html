@@ -850,6 +850,7 @@ function renderAtivadoras() {
     html += '</tbody></table></div></div>';
   }
   html += renderVotosEnquetes();
+  html += renderRespostasDay();
   wrap.innerHTML = renderLeadsGestantes() + html;
 }
 
@@ -868,6 +869,66 @@ function renderLeadsGestantes(){
          '<td><a href="'+l.wa_link+'" target="_blank" style="background:#25d366;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-weight:700;white-space:nowrap">💬 Abrir conversa</a></td></tr>';
   }
   h += '</tbody></table></div></div>';
+  return h;
+}
+
+const RESPOSTAS_DAY = [
+ {
+  "dia": "Quarta",
+  "hora_relato": "10:03",
+  "fake": "Helena",
+  "relato": "Eu vim por indicação de uma amiga... acorda a cada 1h",
+  "resposta": "Que legal que a sua amiga gostou, você vai gostar também, vai te ajudar muito!! 🥰\n\nSeu bebê acabou aprendendo que o lugar de dormir é no colo, e isso é exaustivo para vocês dois.\n\nÉ muito comum o bebê que dorme no colo nas sonecas começar a despertar cada vez mais a noite, mesmo que durma no berço o sono noturno. Por só saber adormecer no colo, precisa do colo pra emendar os ciclos de sono. 😞\n\nO curso é muito bom para isso, você vai aprender a como ensinar seu bebê a adormecer sem estar no colo, de um jeito muito tranquilo. Você vai ensinar de dia e colher bons frutos de dia e a noite também ☺️"
+ },
+ {
+  "dia": "Quarta",
+  "hora_relato": "10:04",
+  "fake": "Jaíne",
+  "relato": "Estou vendo várias mães... minha filha tem 11 meses, tem solução?",
+  "resposta": "Sim!! Temos alunas com bebê desde 6 a 9 dias, para você ter uma noção!! 🥰\n\nTem solução sim!! Que bom que está procurando ajuda agora, porque isso pode se estender por anos!!\n\nO curso vai te ensinar de forma gentil a adaptar a sua bebê no berço, você vai ver como os dias ficarão mais tranquilos, sem contar a noite que ela dormirá muito melhor!!\n\nÉ bem tranquilo de ensinar, em momento nenhum ela vai ficar chorando no berço, a adaptação é bem suave, o bebê nem percebe 🩷"
+ },
+ {
+  "dia": "Quarta",
+  "hora_relato": "10:05",
+  "fake": "Fernanda",
+  "relato": "Meu bebê tem 24 dias... serve p/ recém-nascido?",
+  "resposta": "Sim serve para recém-nascidos sim!! O método tem um perfil específico para essa idade, para ensinar a como adaptar o bebê ao berço!! Por ser recém-nascido, assim que aplicar o método já verá diferença!! O bebê só precisa de ajuda para se adaptar 🥰\n\nO bebê não aprende sozinho, e pode passar do primeiro ano dormindo mal assim. Você faz bem de querer mudar isso já, quanto antes ensinarmos bons hábitos de sono melhor!! 😍"
+ },
+ {
+  "dia": "Quarta",
+  "hora_relato": "10:06",
+  "fake": "Fernanda",
+  "relato": "Já tentei deixar chorando... o método é sem choro mesmo?",
+  "resposta": "Não tem que deixar chorando no berço não!! Super te entendo por não ter conseguido!!\n\nO bebê só precisa aprender, se adaptar ao berço. O berço é um lugar bom, confortável e seguro para ele. Há formas de adaptar o bebê sem deixar chorar, com o método Dream Baby é tão fluído que o bebê nem percebe que está passando por esse processo. Logo vai parecer que sempre dormiu bem no berço!! 🥰"
+ },
+ {
+  "dia": "Quinta",
+  "hora_relato": "09:07",
+  "fake": "Helena",
+  "relato": "Acabei de garantir minha vaga",
+  "resposta": "Que maravilhosaaa ❤️ isso mesmo, já vamos colocar em prática! é rápido, direto, com bebês de verdade.. tudo feito para vocês!"
+ },
+ {
+  "dia": "Quinta",
+  "hora_relato": "10:34",
+  "fake": "Fernanda",
+  "relato": "Meninas, precisava compartilhar... tá no berço!",
+  "resposta": "Ai que linda você ❤️ muito obrigada por compartilhar isso com a gente, muito feliz de saber! Isso é só o começo 🥰"
+ }
+];
+function renderRespostasDay(){
+  const cor={'Quarta':'#7c5cff','Quinta':'#e3a31b'};
+  let h='<div class="section" style="margin-bottom:18px">';
+  h+='<div class="section-header"><div class="section-title"><span class="icon">💬</span> Respostas da Day</div><span class="badge badge-ativo">'+RESPOSTAS_DAY.length+'</span></div>';
+  h+='<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">A Day (pelo WhatsApp oficial) responde os relatos das fakes com citação, ~3 min depois. Textos extraídos do Q&A real (Clube #18) — revise e me passe os ajustes.</div>';
+  for(const r of RESPOSTAS_DAY){
+    const c=cor[r.dia]||'var(--green)';
+    h+='<div style="border:1px solid #1f1f1f;border-radius:12px;padding:12px 14px;margin-bottom:10px">';
+    h+='<div style="margin-bottom:6px"><span class="badge" style="background:'+c+';color:#fff">'+r.dia+' '+r.hora_relato+'</span> <b>'+r.fake+'</b> <span style="color:var(--muted)">— '+r.relato+'</span></div>';
+    h+='<div style="white-space:pre-line;line-height:1.45;background:#141414;border-left:3px solid '+c+';padding:8px 12px;border-radius:6px">'+r.resposta.replace(/</g,'&lt;')+'</div>';
+    h+='</div>';
+  }
+  h+='</div>';
   return h;
 }
 
