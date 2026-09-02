@@ -854,12 +854,21 @@ function renderAtivadoras() {
   wrap.innerHTML = renderLeadsGestantes() + html;
 }
 
-function renderLeadsGestantes(){
+// leads de gestante de um grupo específico (a API traz o nome do grupo em l.grupos)
+function leadsGestantesDoGrupo(g){
   const leads=(DATA&&DATA.leads_gestantes)||[];
+  return leads.filter(l=>(l.grupos||[]).some(x=>{
+    const s=String(x); const n=parseInt((s.match(/#\s*(\d+)/)||[])[1]);
+    return s===g.nome || (!isNaN(n) && n===Number(g.grupo_num));
+  }));
+}
+
+function renderLeadsGestantes(leadsArg,subtitulo){
+  const leads=leadsArg||(DATA&&DATA.leads_gestantes)||[];
   let h='<div class="section" style="margin-bottom:18px;border:1px solid #e3a31b">';
   h+='<div class="section-header"><div class="section-title"><span class="icon">🤰</span> Leads Gestantes</div><span class="badge badge-ativo">'+leads.length+'</span></div>';
-  h+='<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">Quem reagiu ❤️ na mensagem "se você é gestante" (últimos 3 meteóricos). Clique pra abrir a conversa e chamar manual. "Já é cliente?" cruza com as vendas.</div>';
-  if(!leads.length){h+='<div style="color:var(--muted)">Nenhuma gestante marcou ainda.</div></div>';return h;}
+  h+='<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">'+(subtitulo||'Quem reagiu ❤️ na mensagem "se você é gestante" (últimos 3 meteóricos). Clique pra abrir a conversa e chamar manual. "Já é cliente?" cruza com as vendas.')+'</div>';
+  if(!leads.length){h+='<div style="color:var(--muted)">Nenhuma gestante marcou '+(leadsArg?'neste grupo':'ainda')+'.</div></div>';return h;}
   h+='<div class="table-scroll"><table><thead><tr><th>Telefone</th><th>Grupo</th><th>Já é cliente?</th><th style="width:150px">Ação</th></tr></thead><tbody>';
   for(const l of leads){
     let tel=(l.telefone||'').replace(/^55/,'').replace(/(\d{2})(\d{4,5})(\d{4})/,'($1) $2-$3');
@@ -1362,6 +1371,9 @@ function renderGrupoDetail() {
     html += '</tbody></table></div>';
   }
   html += '</div></div>';
+
+  // Leads gestantes deste grupo (quem reagiu ❤️ na msg "se você é gestante")
+  html += renderLeadsGestantes(leadsGestantesDoGrupo(g), 'Quem reagiu ❤️ na mensagem "se você é gestante" neste grupo. Clique pra abrir a conversa e chamar manual. "Já é cliente?" cruza com as vendas. (A API guarda só os últimos 3 meteóricos.)');
 
   // --- Tabela diária (mais antiga → mais recente) ---
   const fluxo = [...(g.fluxo_diario || [])].sort((a, b) => a.data.localeCompare(b.data));
