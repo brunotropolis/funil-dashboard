@@ -905,8 +905,8 @@ const RESPOSTAS_DAY = [
 function renderRespostasDay(){
   const cor={'Quarta':'#7c5cff','Quinta':'#e3a31b'};
   let h='<div class="section" style="margin-bottom:18px">';
-  h+='<div class="section-header"><div class="section-title"><span class="icon">💬</span> Respostas da Day</div><span class="badge badge-ativo">'+RESPOSTAS_DAY.length+'</span></div>';
-  h+='<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">A Day (pelo WhatsApp oficial) responde os relatos das fakes com citação, ~3 min depois. Textos extraídos do Q&A real (Clube #18) — revise e me passe os ajustes.</div>';
+  h+='<div class="section-header"><div class="section-title"><span class="icon">💬</span> Respostas da Day</div><span class="badge badge-pendente">⏸ PAUSADO</span></div>';
+  h+='<div style="font-weight:600;color:var(--muted);margin:2px 0 12px 0">⏸️ DISPARO DESATIVADO (a pedido) — só as fakes disparam por enquanto. Estes textos ficam aqui pra você revisar; quando aprovar, eu reativo. Extraídos do Q&A real (Clube #18).</div>';
   for(const r of RESPOSTAS_DAY){
     const c=cor[r.dia]||'var(--green)';
     h+='<div style="border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px">';
