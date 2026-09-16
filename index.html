@@ -826,6 +826,57 @@ const ATIVADORAS = [
   }
 ];
 
+// ===================== FAKES ON/OFF (sessoes WAHA — economia de RAM fora de meteórico) =====================
+const FAKES_ONOFF_API = 'https://n8n-n8n.xktssy.easypanel.host/webhook/soninho-fakes-onoff';
+const FAKE_NOMES = { fake1: 'Fernanda', fake2: 'Jaíne', fake3: 'Helena' };
+function renderFakesControle() {
+  return '<div class="section" style="margin-bottom:18px;border:1px solid #7c5cff">' +
+    '<div class="section-header"><div class="section-title"><span class="icon">🔌</span> Fakes — ligar/desligar</div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button class="btn btn-green" id="btnFakesOn" onclick="fakesAcao(\'on\')">▶ Ligar todas</button>' +
+    '<button class="btn" id="btnFakesOff" style="background:#e05252;color:#fff" onclick="fakesAcao(\'off\')">⏻ Desligar todas</button>' +
+    '</div></div>' +
+    '<div style="color:var(--muted);font-size:.82rem;margin:2px 0 10px 0">Desligadas, as fakes liberam ~1,8 GB de RAM do servidor. Religar <b>não pede QR</b> (a sessão fica salva) e leva ~1-2 min até WORKING. Desligue só fora de meteórico — elas atuam de terça a quinta.</div>' +
+    '<div id="fakesStatus" style="display:flex;gap:10px;flex-wrap:wrap"><span style="color:var(--muted)">carregando status…</span></div></div>';
+}
+function fakesBadge(st) {
+  const cls = st === 'WORKING' ? 'badge-ativo' : (st === 'STOPPED' ? 'badge-pendente' : (st === 'STARTING' ? 'badge-captando' : 'badge-erro'));
+  const rotulo = { WORKING: 'LIGADA', STOPPED: 'DESLIGADA', STARTING: 'LIGANDO…' }[st] || st;
+  return '<span class="badge ' + cls + '">' + rotulo + '</span>';
+}
+function fmtFakeNum(n) {
+  const m = String(n || '').match(/^55(\d{2})(\d{5})(\d{4})$/);
+  return m ? '+55 ' + m[1] + ' ' + m[2] + '-' + m[3] : (n || '');
+}
+async function loadFakesStatus() {
+  const el = document.getElementById('fakesStatus'); if (!el) return;
+  try {
+    const r = await apiFetch(FAKES_ONOFF_API + '?acao=status');
+    const d = await r.json();
+    el.innerHTML = (d.sessions || []).map(s =>
+      '<div style="background:rgba(124,92,255,.08);border-radius:8px;padding:8px 14px;display:flex;gap:10px;align-items:center">' +
+      '<b>' + (FAKE_NOMES[s.fake] || s.fake) + '</b><span style="color:var(--muted);font-size:.8rem">' + fmtFakeNum(s.numero) + '</span>' + fakesBadge(s.status) + '</div>'
+    ).join('') || '<span style="color:var(--muted)">sem sessões no WAHA</span>';
+    const sts = (d.sessions || []).map(s => s.status);
+    const setBtn = (id, off) => { const b = document.getElementById(id); if (b) { b.disabled = off; b.style.opacity = off ? '.45' : ''; b.style.pointerEvents = off ? 'none' : ''; } };
+    setBtn('btnFakesOn', sts.length > 0 && sts.every(s => s === 'WORKING'));
+    setBtn('btnFakesOff', sts.length > 0 && sts.every(s => s === 'STOPPED'));
+  } catch (e) { el.innerHTML = '<span style="color:#e05252">erro ao consultar: ' + e + '</span>'; }
+}
+async function fakesAcao(acao) {
+  if (acao === 'off' && !confirm('Desligar as 3 fakes? Elas param de postar/votar/reagir até você religar aqui. A sessão fica salva (religa sem QR).')) return;
+  if (acao === 'on' && !confirm('Ligar as 3 fakes agora? Leva ~1-2 min até ficarem WORKING.')) return;
+  const el = document.getElementById('fakesStatus');
+  if (el) el.innerHTML = '<span style="color:var(--muted)">' + (acao === 'on' ? 'ligando… (aguarde, ~1 min até WORKING)' : 'desligando…') + '</span>';
+  try {
+    const r = await apiFetch(FAKES_ONOFF_API + '?acao=' + acao);
+    const d = await r.json();
+    if (d.erro) throw d.erro;
+  } catch (e) { if (el) el.innerHTML = '<span style="color:#e05252">erro: ' + e + '</span>'; return; }
+  loadFakesStatus();
+  if (acao === 'on') { setTimeout(loadFakesStatus, 20000); setTimeout(loadFakesStatus, 60000); }
+}
+
 function renderAtivadoras() {
   const wrap = document.getElementById('ativadorasList');
   if (!wrap) return;
@@ -851,7 +902,8 @@ function renderAtivadoras() {
   }
   html += renderVotosEnquetes();
   html += renderRespostasDay();
-  wrap.innerHTML = renderLeadsGestantes() + html;
+  wrap.innerHTML = renderFakesControle() + renderLeadsGestantes() + html;
+  loadFakesStatus();
 }
 
 // leads de gestante de um grupo específico (a API traz o nome do grupo em l.grupos)
