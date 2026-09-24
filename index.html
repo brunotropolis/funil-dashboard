@@ -365,6 +365,96 @@ tr.clickable:hover td { background: rgba(227,163,27,.07); }
   .produto-info { min-width: 0; flex: 1 1 100%; }
   .produto-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
 }
+
+/* =========================================================
+   ACABAMENTO FINO estilo CRM (24/Set — direção de arte Gemini)
+   Menu colado no canto, miolo centralizado, botões coloridos,
+   ícones em quadradinho colorido, card-destaque dourado.
+   ========================================================= */
+@media (min-width: 861px) {
+  /* menu colado na borda esquerda; só o miolo centraliza (igual CRM) */
+  .app { max-width: none; margin: 0; padding: 12px; gap: 12px; }
+  .content { max-width: 1240px; margin: 0 auto; padding: 14px 20px 40px; }
+}
+
+/* ---- menu lateral: itens maiores, pílula ativa ---- */
+.side-brand { padding: 26px 20px 16px; }
+.side-avatar { box-shadow: 0 0 0 2px rgba(227,163,27,.7); }
+.side-nav { padding: 6px 12px; gap: 4px; }
+.side-nav .main-tab, .side-nav .side-link {
+  font-size: 11px; padding: 10px 12px; border-radius: 12px; gap: 12px; letter-spacing: .05em;
+}
+.side-nav .side-link { margin-top: 10px; padding-top: 14px; border-radius: 0 0 12px 12px; }
+.side-nav .main-tab .ic, .side-nav .side-link .ic { font-size: 16px; }
+.side-nav .main-tab:hover:not(.active) { background: rgba(255,255,255,.06); }
+.side-refresh { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; border-radius: 12px; padding: 8px 12px; }
+.side-refresh:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* ---- cards: profundidade + glow dourado no hover ---- */
+.card, .section { border-radius: 16px; box-shadow: var(--soft-shadow); }
+.card { transition: border-color .15s, box-shadow .15s; }
+.card:hover { border-color: rgba(227,163,27,.6); box-shadow: 0 0 0 1px rgba(227,163,27,.35), 0 8px 24px -10px rgba(227,163,27,.45); }
+.card-value { font-weight: 600; }
+/* Faturamento do Dashboard = destaque dourado cheio (como "Sem resposta" no CRM).
+   Só no #dashCards: nos boxes de Captação/Meteórico o texto colorido some no dourado. */
+#dashCards > .card:first-child { background: var(--accent); border-color: var(--accent); }
+#dashCards > .card:first-child .card-label,
+#dashCards > .card:first-child .card-sub { color: rgba(255,255,255,.85); }
+#dashCards > .card:first-child .card-value { color: #fff; }
+
+/* ---- ícone de seção em quadradinho colorido (cor vem do JS por emoji) ---- */
+.section-title { font-size: 1rem; gap: 10px; }
+.section-title .icon {
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: 36px; height: 36px; border-radius: 11px; font-size: 18px;
+  background: rgba(227,163,27,.14);
+}
+.section-title .icon.t-pink   { background: rgba(236,72,153,.12); }
+.section-title .icon.t-sky    { background: rgba(14,165,233,.12); }
+.section-title .icon.t-amber  { background: rgba(245,158,11,.15); }
+.section-title .icon.t-violet { background: rgba(139,92,246,.13); }
+.section-title .icon.t-emerald{ background: rgba(16,185,129,.13); }
+.section-title .icon.t-teal   { background: rgba(23,162,160,.13); }
+
+/* ---- botões: cor sólida, sem gradiente velho ---- */
+.btn { border-radius: 10px; font-weight: 600; }
+.btn:hover { border-color: rgba(227,163,27,.7); background: #FFFBF1; color: var(--accent2); }
+.btn-sm { border-radius: 9px; }
+.btn-green { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-green:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.btn-meteorico { background: #7C3AED; border-color: #7C3AED; color: #fff; box-shadow: 0 4px 12px -6px rgba(124,58,237,.6); }
+.btn-meteorico:hover { background: #6D28D9; border-color: #6D28D9; color: #fff; }
+.btn-captacao { background: #17A2A0; border-color: #17A2A0; color: #fff; box-shadow: 0 4px 12px -6px rgba(23,162,160,.6); }
+.btn-captacao:hover { background: #0F8A88; border-color: #0F8A88; color: #fff; }
+.btn-danger { background: rgba(214,69,69,.08); }
+.btn-danger:hover { background: var(--red); border-color: var(--red); color: #fff; }
+
+/* ---- badges: pílula com borda (CRM) ---- */
+.badge { border: 1px solid transparent; padding: 3px 10px; letter-spacing: .04em; }
+.badge-ativo, .badge-enviado { border-color: rgba(23,162,160,.35); }
+.badge-captando, .badge-processando { background: rgba(14,165,233,.10); color: #0369A1; border-color: rgba(14,165,233,.35); }
+.badge-aguardando, .badge-pendente, .badge-fila { border-color: rgba(227,163,27,.45); }
+.badge-erro { border-color: rgba(214,69,69,.35); }
+.badge-encerrado, .badge-ignorar { background: #EEF3F2; color: #4F615C; border-color: #B7C7C3; }
+td .btn, td .btn-sm { vertical-align: middle; }
+.section-header .btn { height: 32px; }
+@media (max-width: 860px) {
+  /* título da seção + botões: botões descem pra linha de baixo com respiro */
+  .section-header { flex-wrap: wrap; gap: 10px; }
+  /* filtros: rótulo | campo, um por linha (não encavala) */
+  .filter-bar { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; }
+  .filter-bar select, .filter-bar input { width: 100%; min-width: 0; }
+}
+
+/* ---- tabelas mais leves ---- */
+th { font-size: 10px; font-weight: 700; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+td { border-bottom: 1px solid rgba(35,51,47,.05); }
+tr:hover td { background: rgba(227,163,27,.05); }
+.venda-item-qty { background: var(--accent-bg); color: var(--accent2); border-radius: 7px; }
+
+/* ---- filtros e sub-abas ---- */
+.filter-bar { border-radius: 14px; }
+.tab { border-radius: 9px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -1831,6 +1921,23 @@ document.querySelectorAll('.side-nav .main-tab, .side-nav .side-link').forEach(f
 // ===================== INIT =====================
 loadData();
 setInterval(loadData, 5 * 60 * 1000);
+
+// Quadradinho colorido atrás do ícone de cada seção (estilo CRM).
+// Cor fixa por emoji — a mesma seção tem sempre a mesma cor, em qualquer tela.
+const ICON_TINT = {
+  '💰':'t-emerald','📊':'t-sky','🏷️':'t-amber','🚀':'t-violet','📱':'t-teal','📦':'t-amber',
+  '💬':'t-sky','📈':'t-emerald','📣':'t-pink','🔌':'t-violet','🤰':'t-pink','🗳️':'t-violet',
+  '📅':'t-teal','👥':'t-violet'
+};
+function pintarIcones(root) {
+  (root || document).querySelectorAll('.section-title .icon:not([data-tint])').forEach(el => {
+    el.dataset.tint = '1';
+    const c = ICON_TINT[el.textContent.trim()];
+    if (c) el.classList.add(c);
+  });
+}
+pintarIcones();
+new MutationObserver(() => pintarIcones()).observe(document.body, { childList: true, subtree: true });
 </script>
 </body>
 </html>
